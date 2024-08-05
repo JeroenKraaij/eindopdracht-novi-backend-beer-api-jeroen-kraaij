@@ -1,14 +1,39 @@
 
 package com.backend.beer_api_application.models;
 
+import jakarta.persistence.*;
 import java.util.Objects;
 
+    @Entity
     public class Customer {
 
+        @Id
+        @SequenceGenerator(
+                name = "customer_id_sequence",
+                sequenceName = "customer_id_sequence"
+        )
+        @GeneratedValue(
+                strategy = GenerationType.SEQUENCE,
+                generator = "customer_id_sequence"
+        )
         private Integer id;
+
+        @Column(
+            nullable = false
+        )
         private String name;
+
+        @Column(
+                nullable = false
+        )
         private String email;
+
+
         private Integer age;
+
+        @Column(
+                nullable = false
+        )
         private String phone;
 
         public Customer() {}
@@ -19,6 +44,16 @@ import java.util.Objects;
             this.email = email;
             this.age = age;
             this.phone = phone;
+        }
+
+        public Customer( String name, String email, Integer age, String phone) {
+            this.name = name;
+            this.email = email;
+            this.age = age;
+            this.phone = phone;
+        }
+
+        public Customer(String name, String email, Integer age) {
         }
 
         public Integer getId() {
