@@ -10,6 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class CategoryService {
 
@@ -33,7 +36,7 @@ public class CategoryService {
         Category category = new Category();
         category.setBeerCategoryName(categoryInputDto.getBeerCategoryName());
         category.setBeerCategoryType(categoryInputDto.getBeerCategoryType());
-        category.setBeerCategoryName(categoryInputDto.getBeerCategoryDescription());
+        category.setBeerCategoryDescription(categoryInputDto.getBeerCategoryDescription());
 
         Category savedCategory = categoryRepository.save(category);
 
@@ -46,5 +49,64 @@ public class CategoryService {
         logger.info("Category created with ID: {}", savedCategory.getId());
 
         return categoryOutputDto;
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryOutputDto> getAllCategories() {
+        List<Category> categories = categoryRepository.findAll();
+
+        return categories.stream().map(category -> {
+            CategoryOutputDto dto = new CategoryOutputDto();
+            dto.setId(category.getId());
+            dto.setBeerCategoryName(category.getBeerCategoryName());
+            dto.setBeerCategoryType(category.getBeerCategoryType());
+            dto.setBeerCategoryDescription(category.getBeerCategoryDescription());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public CategoryOutputDto getCategoryById(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found with ID: " + id));
+
+        CategoryOutputDto dto = new CategoryOutputDto();
+        dto.setId(category.getId());
+        dto.setBeerCategoryName(category.getBeerCategoryName());
+        dto.setBeerCategoryType(category.getBeerCategoryType());
+        dto.setBeerCategoryDescription(category.getBeerCategoryDescription());
+
+        return dto;
+    }
+
+    @Transactional
+    public CategoryOutputDto updateCategory(Long id, CategoryInputDto categoryInputDto) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found with ID: " + id));
+
+        category.setBeerCategoryName(categoryInputDto.getBeerCategoryName());
+        category.setBeerCategoryType(categoryInputDto.getBeerCategoryType());
+        category.setBeerCategoryDescription(categoryInputDto.getBeerCategoryDescription());
+
+        Category updatedCategory = categoryRepository.save(category);
+
+        CategoryOutputDto categoryOutputDto = new CategoryOutputDto();
+        categoryOutputDto.setId(updatedCategory.getId());
+        categoryOutputDto.setBeerCategoryName(updatedCategory.getBeerCategoryName());
+        categoryOutputDto.setBeerCategoryType(updatedCategory.getBeerCategoryType());
+        categoryOutputDto.setBeerCategoryDescription(updatedCategory.getBeerCategoryDescription());
+
+        logger.info("Category updated with ID: {}", updatedCategory.getId());
+
+        return categoryOutputDto;
+    }
+
+    @Transactional
+    public void deleteCategory(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found with ID: " + id));
+
+        categoryRepository.delete(category);
+        logger.info("Category deleted with ID: {}", id);
     }
 }

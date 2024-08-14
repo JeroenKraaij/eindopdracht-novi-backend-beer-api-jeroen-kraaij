@@ -2,6 +2,7 @@ package com.backend.beer_api_application.models;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -34,6 +35,9 @@ public class Beer {
     @ManyToOne
     @JoinColumn(nullable = false)
     private Category category;
+
+    @OneToMany(mappedBy = "beer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders;
 
     // Default constructor
     public Beer() {}
@@ -183,6 +187,8 @@ public class Beer {
         this.imageUrl = imageUrl;
     }
 
+
+    // Equals & HashCode
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -209,5 +215,28 @@ public class Beer {
     @Override
     public int hashCode() {
         return Objects.hash(id, name, brand, category, description, color, brewery, country, abv, ibu, food, temperature, glassware, taste, price, imageUrl);
+    }
+
+    // toString
+    @Override
+    public String toString() {
+        return "Beer{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", brand='" + brand + '\'' +
+                ", description='" + description + '\'' +
+                ", color='" + color + '\'' +
+                ", brewery='" + brewery + '\'' +
+                ", country='" + country + '\'' +
+                ", abv=" + abv +
+                ", ibu=" + ibu +
+                ", food='" + food + '\'' +
+                ", temperature='" + temperature + '\'' +
+                ", glassware='" + glassware + '\'' +
+                ", taste='" + taste + '\'' +
+                ", price=" + price +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", category=" + category +
+                '}';
     }
 }

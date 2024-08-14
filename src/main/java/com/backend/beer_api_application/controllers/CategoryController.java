@@ -5,13 +5,11 @@ import com.backend.beer_api_application.dtos.CategoryOutputDto;
 import com.backend.beer_api_application.services.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("api/v1")
@@ -23,9 +21,8 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    @PostMapping("/category")
+    @PostMapping("/categories")
     public ResponseEntity<CategoryOutputDto> createCategory(@Valid @RequestBody CategoryInputDto categoryInputDto) {
-
         CategoryOutputDto categoryOutputDto = categoryService.createCategory(categoryInputDto);
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -34,5 +31,29 @@ public class CategoryController {
                 .toUri();
 
         return ResponseEntity.created(uri).body(categoryOutputDto);
+    }
+
+    @GetMapping("/categories")
+    public ResponseEntity<List<CategoryOutputDto>> getAllCategories() {
+        List<CategoryOutputDto> categories = categoryService.getAllCategories();
+        return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping("/categories/{id}")
+    public ResponseEntity<CategoryOutputDto> getCategoryById(@PathVariable Long id) {
+        CategoryOutputDto categoryOutputDto = categoryService.getCategoryById(id);
+        return ResponseEntity.ok(categoryOutputDto);
+    }
+
+    @PutMapping("/categories/{id}")
+    public ResponseEntity<CategoryOutputDto> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryInputDto categoryInputDto) {
+        CategoryOutputDto updatedCategory = categoryService.updateCategory(id, categoryInputDto);
+        return ResponseEntity.ok(updatedCategory);
+    }
+
+    @DeleteMapping("/categories/{id}")
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+        categoryService.deleteCategory(id);
+        return ResponseEntity.noContent().build();
     }
 }

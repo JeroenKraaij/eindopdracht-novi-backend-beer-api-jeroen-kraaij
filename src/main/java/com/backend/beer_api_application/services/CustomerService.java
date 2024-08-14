@@ -1,102 +1,92 @@
 package com.backend.beer_api_application.services;
 
-import com.backend.beer_api_application.dtos.CustomerRegistrationRequest;
-import com.backend.beer_api_application.dtos.CustomerUpdateRequest;
-import com.backend.beer_api_application.repositories.CustomerRep;
-import com.backend.beer_api_application.exceptions.DuplicateResourceException;
-import com.backend.beer_api_application.exceptions.ResourceNotFoundException;
 import com.backend.beer_api_application.models.Customer;
-import org.springframework.beans.factory.annotation.Qualifier;
+import com.backend.beer_api_application.repositories.CustomerRepository;
+import com.backend.beer_api_application.dtos.CustomerInputDto;
+import com.backend.beer_api_application.dtos.CustomerOutputDto;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomerService {
 
-    private final CustomerRep customerRep;
+    private final CustomerRepository customerRepository;
 
-    public CustomerService(@Qualifier("jpa") CustomerRep customerRep) {
-        this.customerRep = customerRep;
+    @Autowired
+    public CustomerService(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
     }
 
-    public List<Customer> getAllCustomers() {
-        return customerRep.selectAllCustomers();
+    public List<CustomerOutputDto> getAllCustomers() {
+        return customerRepository.findAll().stream()
+                .map(this::convertToOutputDto)
+                .collect(Collectors.toList());
     }
 
-    public Customer getCustomer(Integer id) {
-        return customerRep.selectCustomerById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Customer with id [%s] not found".formatted(id)
-                ));
+    public CustomerOutputDto getCustomerById(Long id) {
+        return customerRepository.findById(id)
+                .map(this::convertToOutputDto)
+                .orElseThrow(() -> new RuntimeException("Customer not found with id: " + id));
     }
 
-    public void addCustomer(CustomerRegistrationRequest customerRegistrationRequest) {
-        String email = customerRegistrationRequest.email();
-        if (customerRep.existsPersonWithEmail(email)) {
-            throw new DuplicateResourceException("Email already taken");
-        }
+    public CustomerOutputDto createCustomer(CustomerInputDto customerInputDto) {
+        Customer customer = convertToEntity(customerInputDto);
+        Customer savedCustomer = customerRepository.save(customer);
+        return convertToOutputDto(savedCustomer);
+    }
 
-        Customer customer = new Customer(
-                customerRegistrationRequest.firstname(),
-                customerRegistrationRequest.surname(),
-                customerRegistrationRequest.address(),
-                customerRegistrationRequest.houseNumber(),
-                customerRegistrationRequest.zipcode(),
-                customerRegistrationRequest.city(),
-                customerRegistrationRequest.email(),
-                customerRegistrationRequest.phone(),
-                customerRegistrationRequest.dateOfBirth()
+    public CustomerOutputDto updateCustomer(Long id, CustomerInputDto customerInputDto) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found with id: " + id));
+
+        customer.setFirstname(customerInputDto.getFirstname());
+        customer.setSurname(customerInputDto.getSurname());
+        customer.setAddress(customerInputDto.getAddress());
+        customer.setHouseNumber(customerInputDto.getHouseNumber());
+        customer.setZipcode(customerInputDto.getZipcode());
+        customer.setCity(customerInputDto.getCity());
+        customer.setEmail(customerInputDto.getEmail());
+        customer.setPhone(customerInputDto.getPhone());
+        customer.setDateOfBirth(customerInputDto.getDateOfBirth());
+
+        Customer updatedCustomer = customerRepository.save(customer);
+        return convertToOutputDto(updatedCustomer);
+    }
+
+    public void deleteCustomer(Long id) {
+        customerRepository.deleteById(id);
+    }
+
+    private Customer convertToEntity(CustomerInputDto customerInputDto) {
+        return new Customer(
+                customerInputDto.getFirstname(),
+                customerInputDto.getSurname(),
+                customerInputDto.getAddress(),
+                customerInputDto.getHouseNumber(),
+                customerInputDto.getZipcode(),
+                customerInputDto.getCity(),
+                customerInputDto.getEmail(),
+                customerInputDto.getPhone(),
+                customerInputDto.getDateOfBirth()
         );
-
-        customerRep.insertCustomer(customer);
     }
 
-    public void deleteCustomerById(Integer customerId) {
-        if (!customerRep.existsPersonWithId(customerId)) {
-            throw new ResourceNotFoundException("Customer with id [%s] not found".formatted(customerId));
-        }
-
-        customerRep.deleteCustomerById(customerId);
-    }
-
-    public void updateCustomer(Integer customerId, CustomerUpdateRequest updateRequest) {
-        Customer existingCustomer = customerRep.selectCustomerById(customerId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Customer with id [%s] not found".formatted(customerId)
-                ));
-
-        if (updateRequest.firstname() != null && !updateRequest.firstname().isEmpty()) {
-            existingCustomer.setFirstname(updateRequest.firstname());
-        }
-        if (updateRequest.surname() != null && !updateRequest.surname().isEmpty()) {
-            existingCustomer.setSurname(updateRequest.surname());
-        }
-        if (updateRequest.address() != null && !updateRequest.address().isEmpty()) {
-            existingCustomer.setAddress(updateRequest.address());
-        }
-        if (updateRequest.houseNumber() != null && !updateRequest.houseNumber().isEmpty()) {
-            existingCustomer.setHouseNumber(updateRequest.houseNumber());
-        }
-        if (updateRequest.zipcode() != null && !updateRequest.zipcode().isEmpty()) {
-            existingCustomer.setZipcode(updateRequest.zipcode());
-        }
-        if (updateRequest.city() != null && !updateRequest.city().isEmpty()) {
-            existingCustomer.setCity(updateRequest.city());
-        }
-        if (updateRequest.email() != null && !updateRequest.email().isEmpty()) {
-            if (customerRep.existsPersonWithEmail(updateRequest.email())) {
-                throw new DuplicateResourceException("Email already taken");
-            }
-            existingCustomer.setEmail(updateRequest.email());
-        }
-        if (updateRequest.phone() != null && !updateRequest.phone().isEmpty()) {
-            existingCustomer.setPhone(updateRequest.phone());
-        }
-        if (updateRequest.dateOfBirth() != null) {
-            existingCustomer.setDateOfBirth(String.valueOf(updateRequest.dateOfBirth()));
-        }
-
-        customerRep.updateCustomer(existingCustomer);
+    private CustomerOutputDto convertToOutputDto(Customer customer) {
+        return new CustomerOutputDto(
+                customer.getId(),
+                customer.getFirstname(),
+                customer.getSurname(),
+                customer.getAddress(),
+                customer.getHouseNumber(),
+                customer.getZipcode(),
+                customer.getCity(),
+                customer.getEmail(),
+                customer.getPhone(),
+                customer.getDateOfBirth()
+        );
     }
 }

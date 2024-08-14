@@ -1,22 +1,18 @@
 package com.backend.beer_api_application.models;
 
 import jakarta.persistence.*;
+
+import java.util.List;
 import java.util.Objects;
 
 @Entity
 @Table(name = "Customers")
 public class Customer {
 
+
     @Id
-    @SequenceGenerator(
-            name = "customer_id_sequence",
-            sequenceName = "customer_id_sequence"
-    )
     @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "customer_id_sequence"
-    )
-    @Column
+            strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column
@@ -46,21 +42,13 @@ public class Customer {
     @Column
     private String dateOfBirth;
 
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders;
+
+    // Default constructor
     public Customer() {}
 
-    public Customer(Long id, String firstname, String surname, String address, String houseNumber, String zipcode, String city, String email, String phone, String dateOfBirth) {
-        this.id = id;
-        this.firstname = firstname;
-        this.surname = surname;
-        this.address = address;
-        this.houseNumber = houseNumber;
-        this.zipcode = zipcode;
-        this.city = city;
-        this.email = email;
-        this.phone = phone;
-        this.dateOfBirth = String.valueOf(dateOfBirth);
-    }
-
+    // All-args constructor
     public Customer(String firstname, String surname, String address, String houseNumber, String zipcode, String city, String email, String phone, String dateOfBirth) {
         this.firstname = firstname;
         this.surname = surname;
@@ -73,6 +61,7 @@ public class Customer {
         this.dateOfBirth = String.valueOf(dateOfBirth);
     }
 
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -153,6 +142,7 @@ public class Customer {
         this.dateOfBirth = String.valueOf(dateOfBirth);
     }
 
+    // Equals & HashCode
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -175,6 +165,7 @@ public class Customer {
         return Objects.hash(id, firstname, surname, address, houseNumber, zipcode, city, email, phone, dateOfBirth);
     }
 
+    // toString
     @Override
     public String toString() {
         return "Customer{" +

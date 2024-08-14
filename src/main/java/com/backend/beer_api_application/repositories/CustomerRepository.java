@@ -2,11 +2,9 @@ package com.backend.beer_api_application.repositories;
 
 import com.backend.beer_api_application.models.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
 
-public interface CustomerRepository
-
-extends JpaRepository<Customer, Integer> {
-
-    boolean existsCustomerByEmail(String email);
-    boolean existsCustomerById(Integer id);
+public interface CustomerRepository extends JpaRepository<Customer, Long> {
+    Optional<Customer> findByEmail(String email);
 }
+

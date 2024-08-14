@@ -1,8 +1,7 @@
 package com.backend.beer_api_application.controllers;
 
-import com.backend.beer_api_application.dtos.CustomerRegistrationRequest;
-import com.backend.beer_api_application.dtos.CustomerUpdateRequest;
-import com.backend.beer_api_application.models.Customer;
+import com.backend.beer_api_application.dtos.CustomerInputDto;
+import com.backend.beer_api_application.dtos.CustomerOutputDto;
 import com.backend.beer_api_application.services.CustomerService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/customers")
+@RequestMapping("api/v1")
 public class CustomerController {
 
     private final CustomerService customerService;
@@ -21,38 +20,38 @@ public class CustomerController {
     }
 
     // Get All Customers
-    @GetMapping
-    public ResponseEntity<List<Customer>> getAllCustomers() {
-        List<Customer> customers = customerService.getAllCustomers();
+    @GetMapping("/customers")
+    public ResponseEntity<List<CustomerOutputDto>> getAllCustomers() {
+        List<CustomerOutputDto> customers = customerService.getAllCustomers();
         return ResponseEntity.ok(customers);
     }
 
     // Get Customer by Id
-    @GetMapping("{customerId}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable("customerId") Integer customerId) {
-        Customer customer = customerService.getCustomer(customerId);
+    @GetMapping("/customers/{Id}")
+    public ResponseEntity<CustomerOutputDto> getCustomerById(@PathVariable("Id") Long customerId) {
+        CustomerOutputDto customer = customerService.getCustomerById(customerId);
         return ResponseEntity.ok(customer);
     }
 
     // Create a Customer
-    @PostMapping
-    public ResponseEntity<Void> createCustomer(@Valid @RequestBody CustomerRegistrationRequest request) {
-        customerService.addCustomer(request);
-        return ResponseEntity.status(201).build(); // Return 201 Created status
+    @PostMapping("/customers")
+    public ResponseEntity<CustomerOutputDto> createCustomer(@Valid @RequestBody CustomerInputDto request) {
+        CustomerOutputDto createdCustomer = customerService.createCustomer(request);
+        return ResponseEntity.status(201).body(createdCustomer);
     }
 
     // Update a Customer
-    @PutMapping("{customerId}")
-    public ResponseEntity<Void> updateCustomer(@PathVariable("customerId") Integer customerId,
-                                               @Valid @RequestBody CustomerUpdateRequest updateRequest) {
-        customerService.updateCustomer(customerId, updateRequest);
-        return ResponseEntity.ok().build(); // Return 200 OK status
+    @PutMapping("/customers/{Id}")
+    public ResponseEntity<CustomerOutputDto> updateCustomer(@PathVariable("Id") Long customerId,
+                                                            @Valid @RequestBody CustomerInputDto updateRequest) {
+        CustomerOutputDto updatedCustomer = customerService.updateCustomer(customerId, updateRequest);
+        return ResponseEntity.ok(updatedCustomer);
     }
 
     // Delete a Customer
-    @DeleteMapping("{customerId}")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable("customerId") Integer customerId) {
-        customerService.deleteCustomerById(customerId);
-        return ResponseEntity.noContent().build(); // Return 204 No Content status
+    @DeleteMapping("/customers/{Id}")
+    public ResponseEntity<Void> deleteCustomer(@PathVariable("Id") Long customerId) {
+        customerService.deleteCustomer(customerId);
+        return ResponseEntity.noContent().build();
     }
 }
