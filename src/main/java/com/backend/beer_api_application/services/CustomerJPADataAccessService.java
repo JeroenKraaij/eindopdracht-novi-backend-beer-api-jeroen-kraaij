@@ -1,31 +1,30 @@
-package com.backend.beer_api_application.repositories;
+package com.backend.beer_api_application.services;
 
-import com.backend.beer_api_application.dtos.CustomerDao;
+import com.backend.beer_api_application.repositories.CustomerRep;
 import com.backend.beer_api_application.models.Customer;
+import com.backend.beer_api_application.repositories.CustomerRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository("jpa")
-public class CustomerJPADataAccessService implements CustomerDao {
+public class CustomerJPADataAccessService implements CustomerRep {
 
-    private final CustomerRepository CustomerRepository;
     private final CustomerRepository customerRepository;
 
-    public CustomerJPADataAccessService(com.backend.beer_api_application.repositories.CustomerRepository customerRepository) {
-        CustomerRepository = customerRepository;
+    public CustomerJPADataAccessService(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
     }
 
     @Override
     public List<Customer> selectAllCustomers() {
-        return CustomerRepository.findAll();
+        return customerRepository.findAll();
     }
 
     @Override
     public Optional<Customer> selectCustomerById(Integer id) {
-        return CustomerRepository.findById(id);
+        return customerRepository.findById(id);
     }
 
     @Override

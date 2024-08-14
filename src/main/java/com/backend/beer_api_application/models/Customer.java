@@ -1,123 +1,195 @@
-
 package com.backend.beer_api_application.models;
 
 import jakarta.persistence.*;
 import java.util.Objects;
 
-    @Entity
-    public class Customer {
+@Entity
+@Table(name = "Customers")
+public class Customer {
 
-        @Id
-        @SequenceGenerator(
-                name = "customer_id_sequence",
-                sequenceName = "customer_id_sequence"
-        )
-        @GeneratedValue(
-                strategy = GenerationType.SEQUENCE,
-                generator = "customer_id_sequence"
-        )
-        private Integer id;
+    @Id
+    @SequenceGenerator(
+            name = "customer_id_sequence",
+            sequenceName = "customer_id_sequence"
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "customer_id_sequence"
+    )
+    @Column
+    private Long id;
 
-        @Column(
-            nullable = false
-        )
-        private String name;
+    @Column
+    private String firstname;
 
-        @Column(
-                nullable = false
-        )
-        private String email;
+    @Column
+    private String surname;
 
+    @Column
+    private String address;
 
-        private Integer age;
+    @Column
+    private String houseNumber;
 
-        @Column(
-                nullable = false
-        )
-        private String phone;
+    @Column
+    private String zipcode;
 
-        public Customer() {}
+    @Column
+    private String city;
 
-        public Customer(Integer id, String name, String email, Integer age, String phone) {
-            this.id = id;
-            this.name = name;
-            this.email = email;
-            this.age = age;
-            this.phone = phone;
-        }
+    @Column(unique = true)
+    private String email;
 
-        public Customer( String name, String email, Integer age, String phone) {
-            this.name = name;
-            this.email = email;
-            this.age = age;
-            this.phone = phone;
-        }
+    @Column
+    private String phone;
 
-        public Customer(String name, String email, Integer age) {
-        }
+    @Column
+    private String dateOfBirth;
 
-        public Integer getId() {
-            return id;
-        }
+    public Customer() {}
 
-        public void setId(Integer id) {
-            this.id = id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public Integer getAge() {
-            return age;
-        }
-
-        public void setAge(Integer age) {
-            this.age = age;
-        }
-
-        public String getPhone() {
-            return phone;
-        }
-        public void setPhone(String phone) {
-            this.phone = phone;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            Customer customer = (Customer) o;
-            return Objects.equals(id, customer.id) && Objects.equals(name, customer.name) && Objects.equals(email, customer.email) && Objects.equals(age, customer.age) && Objects.equals(phone, customer.phone);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash (id, name, email, age, phone);
-        }
-
-        @Override
-        public String toString() {
-            return "Customer{" +
-                    "id=" + id +
-                    ", name='" + name + '\'' +
-                    ", email='" + email + '\'' +
-                    ", age=" + age +
-                    ", phone='" + phone + '\'' +
-                    '}';
-        }
+    public Customer(Long id, String firstname, String surname, String address, String houseNumber, String zipcode, String city, String email, String phone, String dateOfBirth) {
+        this.id = id;
+        this.firstname = firstname;
+        this.surname = surname;
+        this.address = address;
+        this.houseNumber = houseNumber;
+        this.zipcode = zipcode;
+        this.city = city;
+        this.email = email;
+        this.phone = phone;
+        this.dateOfBirth = String.valueOf(dateOfBirth);
     }
 
+    public Customer(String firstname, String surname, String address, String houseNumber, String zipcode, String city, String email, String phone, String dateOfBirth) {
+        this.firstname = firstname;
+        this.surname = surname;
+        this.address = address;
+        this.houseNumber = houseNumber;
+        this.zipcode = zipcode;
+        this.city = city;
+        this.email = email;
+        this.phone = phone;
+        this.dateOfBirth = String.valueOf(dateOfBirth);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getFirstname() {
+        return firstname;
+    }
+
+    public void setFirstname(String firstname) {
+        this.firstname = firstname;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getHouseNumber() {
+        return houseNumber;
+    }
+
+    public void setHouseNumber(String houseNumber) {
+        this.houseNumber = houseNumber;
+    }
+
+    public String getZipcode() {
+        return zipcode;
+    }
+
+    public void setZipcode(String zipcode) {
+        this.zipcode = zipcode;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(String dateOfBirth) {
+        this.dateOfBirth = String.valueOf(dateOfBirth);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Customer customer = (Customer) o;
+        return Objects.equals(id, customer.id) &&
+                Objects.equals(firstname, customer.firstname) &&
+                Objects.equals(surname, customer.surname) &&
+                Objects.equals(address, customer.address) &&
+                Objects.equals(houseNumber, customer.houseNumber) &&
+                Objects.equals(zipcode, customer.zipcode) &&
+                Objects.equals(city, customer.city) &&
+                Objects.equals(email, customer.email) &&
+                Objects.equals(phone, customer.phone) &&
+                Objects.equals(dateOfBirth, customer.dateOfBirth);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstname, surname, address, houseNumber, zipcode, city, email, phone, dateOfBirth);
+    }
+
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "id=" + id +
+                ", firstname='" + firstname + '\'' +
+                ", surname='" + surname + '\'' +
+                ", address='" + address + '\'' +
+                ", houseNumber='" + houseNumber + '\'' +
+                ", zipcode='" + zipcode + '\'' +
+                ", city='" + city + '\'' +
+                ", email='" + email + '\'' +
+                ", phone='" + phone + '\'' +
+                ", dateOfBirth=" + dateOfBirth +
+                '}';
+    }
+
+
+}
