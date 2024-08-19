@@ -68,10 +68,10 @@ VALUES
 
 
 
--- INSERT INTO customers (id, firstname, surname, address, houseNumber, zipcode, city, email, phone, dateOfBirth)
--- VALUES
---     ('John', 'Doe', '123 Maple Street', '10A', '12345', 'Springfield', 'john.doe@example.com', '555-1234', '1980-01-15'),
---     ('Jane', 'Smith', '456 Oak Avenue', '22B', '67890', 'Greenville', 'jane.smith@example.com', '555-5678', '1985-02-20'),
---     ('Emily', 'Johnson', '789 Pine Road', '3C', '54321', 'Hilltown', 'emily.johnson@example.com', '555-9101', '1990-03-25'),
---     ('Michael', 'Brown', '101 Cedar Lane', '4D', '98765', 'Rivercity', 'michael.brown@example.com', '555-1122', '1975-04-30'),
---     ('Olivia', 'Davis', '202 Birch Boulevard', '5E', '87654', 'Lakeside', 'olivia.davis@example.com', '555-1314', '1992-05-10');
+INSERT INTO customers (firstname, surname, address, house_number, zipcode, city, email, phone, date_of_birth)
+VALUES
+    ('John', 'Doe', '123 Maple Street', '10A', '12345', 'Springfield', 'john.doe@example.com', '555-1234', '1980-01-15'),
+    ('Jane', 'Smith', '456 Oak Avenue', '22B', '67890', 'Greenville', 'jane.smith@example.com', '555-5678', '1985-02-20'),
+    ('Emily', 'Johnson', '789 Pine Road', '3C', '54321', 'Hilltown', 'emily.johnson@example.com', '555-9101', '1990-03-25'),
+    ('Michael', 'Brown', '101 Cedar Lane', '4D', '98765', 'Rivercity', 'michael.brown@example.com', '555-1122', '1975-04-30'),
+    ('Olivia', 'Davis', '202 Birch Boulevard', '5E', '87654', 'Lakeside', 'olivia.davis@example.com', '555-1314', '1992-05-10');

@@ -1,7 +1,7 @@
 package com.backend.beer_api_application.services;
 
-import com.backend.beer_api_application.dtos.CategoryInputDto;
-import com.backend.beer_api_application.dtos.CategoryOutputDto;
+import com.backend.beer_api_application.dto.input.CategoryInputDto;
+import com.backend.beer_api_application.dto.output.CategoryOutputDto;
 import com.backend.beer_api_application.models.Category;
 import com.backend.beer_api_application.repositories.BeerRepository;
 import com.backend.beer_api_application.repositories.CategoryRepository;

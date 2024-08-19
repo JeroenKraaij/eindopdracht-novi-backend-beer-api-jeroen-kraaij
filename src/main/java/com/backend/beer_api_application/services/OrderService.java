@@ -1,6 +1,7 @@
 package com.backend.beer_api_application.services;
 
-import com.backend.beer_api_application.dtos.OrderInputDto;
+import com.backend.beer_api_application.dto.input.OrderInputDto;
+import com.backend.beer_api_application.dto.output.OrderOutputDto;
 import com.backend.beer_api_application.models.Beer;
 import com.backend.beer_api_application.models.Customer;
 import com.backend.beer_api_application.models.Order;
@@ -10,6 +11,7 @@ import com.backend.beer_api_application.repositories.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 public class OrderService {
@@ -35,4 +37,14 @@ public class OrderService {
 
         return orderRepository.save(order);
     }
+
+//    public OrderOutputDto getOrderById(Long id) {
+//        Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
+//        OrderOutputDto orderOutputDto = new OrderOutputDto();
+//        orderOutputDto.setBeerNames(order.getBeer().getName().lines().toList());
+//
+//
+//    }
+
+
 }

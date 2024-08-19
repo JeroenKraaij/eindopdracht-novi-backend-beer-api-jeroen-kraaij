@@ -1,5 +1,8 @@
-package com.backend.beer_api_application.dtos;
+package com.backend.beer_api_application.dto.input;
 
+import lombok.Data;
+
+@Data
 public class OrderInputDto {
 
     private Long customerId;

@@ -1,6 +1,6 @@
-package com.backend.beer_api_application.controllers;
+package com.backend.beer_api_application.controller;
 
-import com.backend.beer_api_application.dtos.OrderInputDto;
+import com.backend.beer_api_application.dto.input.OrderInputDto;
 import com.backend.beer_api_application.models.Order;
 import com.backend.beer_api_application.services.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;

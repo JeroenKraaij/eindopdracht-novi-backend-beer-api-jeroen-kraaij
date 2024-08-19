@@ -1,7 +1,7 @@
-package com.backend.beer_api_application.controllers;
+package com.backend.beer_api_application.controller;
 
-import com.backend.beer_api_application.dtos.BeerDto;
-import com.backend.beer_api_application.dtos.BeerInputDto;
+import com.backend.beer_api_application.dto.output.BeerOutputDto;
+import com.backend.beer_api_application.dto.input.BeerInputDto;
 import com.backend.beer_api_application.services.BeerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +20,8 @@ public class BeerController {
 
     // Get all beers
     @GetMapping("/beers")
-    public ResponseEntity<List<BeerDto>> getAllBeers(@RequestParam(value = "brand", required = false) Optional<String> brand) {
-        List<BeerDto> dtos;
+    public ResponseEntity<List<BeerOutputDto>> getAllBeers(@RequestParam(value = "brand", required = false) Optional<String> brand) {
+        List<BeerOutputDto> dtos;
         if (brand.isEmpty()) {
             dtos = beerService.getAllBeers();
         } else {
@@ -32,15 +32,15 @@ public class BeerController {
 
     // Get Beer by ID
     @GetMapping("/beers/{id}")
-    public ResponseEntity<BeerDto> getBeerById(@PathVariable("id") Long id) {
-        BeerDto beer = beerService.getBeerById(id);
+    public ResponseEntity<BeerOutputDto> getBeerById(@PathVariable("id") Long id) {
+        BeerOutputDto beer = beerService.getBeerById(id);
         return ResponseEntity.ok().body(beer);
     }
 
     // Add a beer
     @PostMapping("/beers")
-    public ResponseEntity<BeerDto> addBeer(@RequestBody BeerInputDto beerInputDto) {
-        BeerDto dto = beerService.addBeer(beerInputDto);
+    public ResponseEntity<BeerOutputDto> addBeer(@RequestBody BeerInputDto beerInputDto) {
+        BeerOutputDto dto = beerService.addBeer(beerInputDto);
         return ResponseEntity.created(null).body(dto);
     }
 
@@ -53,8 +53,8 @@ public class BeerController {
 
     // Update a beer by ID
     @PutMapping("/beers/{id}")
-    public ResponseEntity<BeerDto> updateBeer(@PathVariable Long id,  @RequestBody BeerInputDto newBeer) {
-        BeerDto dto = beerService.updateBeer(id, newBeer);
+    public ResponseEntity<BeerOutputDto> updateBeer(@PathVariable Long id, @RequestBody BeerInputDto newBeer) {
+        BeerOutputDto dto = beerService.updateBeer(id, newBeer);
         return ResponseEntity.ok().body(dto);
     }
 }

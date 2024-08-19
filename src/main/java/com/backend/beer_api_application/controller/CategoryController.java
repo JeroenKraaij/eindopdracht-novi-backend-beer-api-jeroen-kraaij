@@ -1,7 +1,7 @@
-package com.backend.beer_api_application.controllers;
+package com.backend.beer_api_application.controller;
 
-import com.backend.beer_api_application.dtos.CategoryInputDto;
-import com.backend.beer_api_application.dtos.CategoryOutputDto;
+import com.backend.beer_api_application.dto.input.CategoryInputDto;
+import com.backend.beer_api_application.dto.output.CategoryOutputDto;
 import com.backend.beer_api_application.services.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
