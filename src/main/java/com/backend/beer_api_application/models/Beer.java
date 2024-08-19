@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -22,6 +23,15 @@ public class Beer {
     @Column(nullable = false)
     @Setter
     private String brand;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    @Setter
+    private Category category;
+
+    public String getBeerCategoryType() {
+        return category != null ? category.getBeerCategoryType() : null;
+    }
 
     @Column(length = 1000, nullable = false)
     @Setter
@@ -62,15 +72,21 @@ public class Beer {
     @Setter
     private String imageUrl;
 
-    @ManyToOne
-    @JoinColumn(nullable = false)
-    @Setter
-    private Category category;
-
-    @ManyToMany(mappedBy = "beer", cascade = CascadeType.ALL)
-    private List<Order> orders;
+    // One-to-many relationship with OrderLine
+    @OneToMany(mappedBy = "beer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderLine> orderLines = new ArrayList<>();
 
     // Default constructor
-    public Beer() {
+    public Beer() {}
+
+    // Helper methods to manage the order lines
+    public void addOrderLine(OrderLine orderLine) {
+        orderLines.add(orderLine);
+        orderLine.setBeer(this);
+    }
+
+    public void removeOrderLine(OrderLine orderLine) {
+        orderLines.remove(orderLine);
+        orderLine.setBeer(null);
     }
 }

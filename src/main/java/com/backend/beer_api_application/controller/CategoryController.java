@@ -21,18 +21,6 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    @PostMapping("/categories")
-    public ResponseEntity<CategoryOutputDto> createCategory(@Valid @RequestBody CategoryInputDto categoryInputDto) {
-        CategoryOutputDto categoryOutputDto = categoryService.createCategory(categoryInputDto);
-        URI uri = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(categoryOutputDto.getId())
-                .toUri();
-
-        return ResponseEntity.created(uri).body(categoryOutputDto);
-    }
-
     @GetMapping("/categories")
     public ResponseEntity<List<CategoryOutputDto>> getAllCategories() {
         List<CategoryOutputDto> categories = categoryService.getAllCategories();
@@ -43,6 +31,18 @@ public class CategoryController {
     public ResponseEntity<CategoryOutputDto> getCategoryById(@PathVariable Long id) {
         CategoryOutputDto categoryOutputDto = categoryService.getCategoryById(id);
         return ResponseEntity.ok(categoryOutputDto);
+    }
+
+    @PostMapping("/categories")
+    public ResponseEntity<CategoryOutputDto> createCategory(@Valid @RequestBody CategoryInputDto categoryInputDto) {
+        CategoryOutputDto categoryOutputDto = categoryService.addCategory(categoryInputDto);
+        URI uri = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(categoryOutputDto.getId())
+                .toUri();
+
+        return ResponseEntity.created(uri).body(categoryOutputDto);
     }
 
     @PutMapping("/categories/{id}")

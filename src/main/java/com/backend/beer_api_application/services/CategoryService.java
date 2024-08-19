@@ -26,31 +26,6 @@ public class CategoryService {
         this.beerRepository = beerRepository;
     }
 
-    @Transactional
-    public CategoryOutputDto createCategory(CategoryInputDto categoryInputDto) {
-        if (categoryInputDto == null) {
-            logger.error("CategoryInputDto cannot be null");
-            throw new IllegalArgumentException("CategoryInputDto cannot be null");
-        }
-
-        Category category = new Category();
-        category.setBeerCategoryName(categoryInputDto.getBeerCategoryName());
-        category.setBeerCategoryType(categoryInputDto.getBeerCategoryType());
-        category.setBeerCategoryDescription(categoryInputDto.getBeerCategoryDescription());
-
-        Category savedCategory = categoryRepository.save(category);
-
-        CategoryOutputDto categoryOutputDto = new CategoryOutputDto();
-        categoryOutputDto.setId(savedCategory.getId());
-        categoryOutputDto.setBeerCategoryName(savedCategory.getBeerCategoryName());
-        categoryOutputDto.setBeerCategoryType(savedCategory.getBeerCategoryType());
-        categoryOutputDto.setBeerCategoryDescription(savedCategory.getBeerCategoryDescription());
-
-        logger.info("Category created with ID: {}", savedCategory.getId());
-
-        return categoryOutputDto;
-    }
-
     @Transactional(readOnly = true)
     public List<CategoryOutputDto> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();
@@ -77,6 +52,31 @@ public class CategoryService {
         dto.setBeerCategoryDescription(category.getBeerCategoryDescription());
 
         return dto;
+    }
+
+    @Transactional
+    public CategoryOutputDto addCategory(CategoryInputDto categoryInputDto) {
+        if (categoryInputDto == null) {
+            logger.error("CategoryInputDto cannot be null");
+            throw new IllegalArgumentException("CategoryInputDto cannot be null");
+        }
+
+        Category category = new Category();
+        category.setBeerCategoryName(categoryInputDto.getBeerCategoryName());
+        category.setBeerCategoryType(categoryInputDto.getBeerCategoryType());
+        category.setBeerCategoryDescription(categoryInputDto.getBeerCategoryDescription());
+
+        Category savedCategory = categoryRepository.save(category);
+
+        CategoryOutputDto categoryOutputDto = new CategoryOutputDto();
+        categoryOutputDto.setId(savedCategory.getId());
+        categoryOutputDto.setBeerCategoryName(savedCategory.getBeerCategoryName());
+        categoryOutputDto.setBeerCategoryType(savedCategory.getBeerCategoryType());
+        categoryOutputDto.setBeerCategoryDescription(savedCategory.getBeerCategoryDescription());
+
+        logger.info("Category created with ID: {}", savedCategory.getId());
+
+        return categoryOutputDto;
     }
 
     @Transactional

@@ -1,43 +1,18 @@
 package com.backend.beer_api_application.dto.input;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class OrderInputDto {
 
-    private Long customerId;
-    private Long beerId;
-    private Integer quantity;
+    @NotNull(message = "Customer ID is mandatory")
+    private Long customerId;  // ID of the customer placing the order
 
-    public OrderInputDto() {}
-
-    public OrderInputDto(Long customerId, Long beerId, Integer quantity) {
-        this.customerId = customerId;
-        this.beerId = beerId;
-        this.quantity = quantity;
-    }
-
-    public Long getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(Long customerId) {
-        this.customerId = customerId;
-    }
-
-    public Long getId() {
-        return beerId;
-    }
-
-    public void setBeerId(Long beerId) {
-        this.beerId = beerId;
-    }
-
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
+    @NotEmpty(message = "Order must contain at least one order line")
+    private List<@NotNull(message = "Order line cannot be null") OrderLineInputDto> orderLines;  // List of order line details
 }
+

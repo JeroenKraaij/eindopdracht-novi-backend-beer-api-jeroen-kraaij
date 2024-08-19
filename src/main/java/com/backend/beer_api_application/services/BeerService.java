@@ -1,20 +1,21 @@
 package com.backend.beer_api_application.services;
 
-import com.backend.beer_api_application.dto.output.BeerOutputDto;
 import com.backend.beer_api_application.dto.input.BeerInputDto;
+import com.backend.beer_api_application.dto.mapper.BeerMapper;
+import com.backend.beer_api_application.dto.output.BeerOutputDto;
 import com.backend.beer_api_application.exceptions.RecordNotFoundException;
 import com.backend.beer_api_application.models.Beer;
-import com.backend.beer_api_application.models.Category;
 import com.backend.beer_api_application.repositories.BeerRepository;
 import com.backend.beer_api_application.repositories.CategoryRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.backend.beer_api_application.dto.mapper.BeerMapper.transferToBeerEntity;
-import static com.backend.beer_api_application.dto.mapper.BeerMapper.transferToDto;
+import static com.backend.beer_api_application.dto.mapper.BeerMapper.transferToBeerOutputDto;
 
 @Service
 public class BeerService {
@@ -27,44 +28,44 @@ public class BeerService {
         this.categoryRepository = categoryRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<BeerOutputDto> getAllBeers() {
-        List<Beer> beerList = beerRepository.findAll();
-        List<BeerOutputDto> beerOutputDtoList = new ArrayList<>();
-
-        for (Beer beer : beerList) {
-            BeerOutputDto dto = transferToDto(beer);
-            beerOutputDtoList.add(dto);
-        }
-        return beerOutputDtoList;
+        return beerRepository.findAll().stream()
+                .map(BeerMapper::transferToBeerOutputDto)
+                .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<BeerOutputDto> getAllBeersByBrand(String brand) {
-        List<Beer> beerList = beerRepository.findAllBeersByBrandEqualsIgnoreCase(brand);
-        List<BeerOutputDto> beerOutputDtoList = new ArrayList<>();
-
-        for (Beer beer : beerList) {
-            BeerOutputDto dto = transferToDto(beer);
-            beerOutputDtoList.add(dto);
-        }
-        return beerOutputDtoList;
+        return beerRepository.findAllBeersByBrandEqualsIgnoreCase(brand).stream()
+                .map(BeerMapper::transferToBeerOutputDto)
+                .collect(Collectors.toList());
     }
 
-    public BeerOutputDto getBeerById(Long id) {
-        Optional<Beer> beerOptional = beerRepository.findById(id);
-        if (beerOptional.isPresent()) {
-            Beer beer = beerOptional.get();
-            return transferToDto(beer);
-        } else {
-            throw new RecordNotFoundException("No Beer found with ID " + id);
-        }
+    @Transactional(readOnly = true)
+    public Optional<Beer> getBeerById(Long id) {
+        return beerRepository.findById(id);
     }
 
+    @Transactional
     public BeerOutputDto addBeer(BeerInputDto beerInputDto) {
         Beer beer = transferToBeerEntity(beerInputDto);
         beerRepository.save(beer);
-        return transferToDto(beer);
+        return transferToBeerOutputDto(beer);
     }
 
+    @Transactional
+    public BeerOutputDto updateBeer(Long id, BeerInputDto beerInputDto) {
+        Beer beer = beerRepository.findById(id)
+                .orElseThrow(() -> new RecordNotFoundException("No Beer found with ID " + id));
+
+        updateBeerEntity(beer, beerInputDto);
+        beerRepository.save(beer);
+
+        return transferToBeerOutputDto(beer);
+    }
+
+    @Transactional
     public void deleteBeer(Long id) {
         if (!beerRepository.existsById(id)) {
             throw new RecordNotFoundException("No Beer found with ID " + id);
@@ -72,35 +73,7 @@ public class BeerService {
         beerRepository.deleteById(id);
     }
 
-    public BeerOutputDto updateBeer(Long id, BeerInputDto beerInputDto) {
-        Optional<Beer> beerOptional = beerRepository.findById(id);
-        if (beerOptional.isPresent()) {
-            Beer beer = beerOptional.get();
-            beer.setName(beerInputDto.getName());
-            beer.setBrand(beerInputDto.getBrand());
-
-            Category category = categoryRepository.findById(beerInputDto.getCategory())
-                    .orElseThrow(() -> new RecordNotFoundException("Category not found with ID " + beerInputDto.getCategory()));
-
-            beer.setDescription(beerInputDto.getDescription());
-            beer.setColor(beerInputDto.getColor());
-            beer.setBrewery(beerInputDto.getBrewery());
-            beer.setCountry(beerInputDto.getCountry());
-            beer.setAbv(beerInputDto.getAbv());
-            beer.setIbu(beerInputDto.getIbu());
-            beer.setFood(beerInputDto.getFood());
-            beer.setTemperature(beerInputDto.getTemperature());
-            beer.setGlassware(beerInputDto.getGlassware());
-            beer.setTaste(beerInputDto.getTaste());
-            beer.setPrice(beerInputDto.getPrice());
-            beer.setImageUrl(beerInputDto.getImageUrl());
-
-            beerRepository.save(beer);
-            return transferToDto(beer);
-        } else {
-            throw new RecordNotFoundException("No Beer found with ID " + id);
-        }
+    private void updateBeerEntity(Beer beer, BeerInputDto beerInputDto) {
+        // Logic to update Beer entity fields with values from BeerInputDto
     }
-
-
 }

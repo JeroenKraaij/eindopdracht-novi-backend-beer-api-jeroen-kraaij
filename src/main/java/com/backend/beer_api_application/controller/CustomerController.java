@@ -36,7 +36,7 @@ public class CustomerController {
     // Create a Customer
     @PostMapping("/customers")
     public ResponseEntity<CustomerOutputDto> createCustomer(@Valid @RequestBody CustomerInputDto request) {
-        CustomerOutputDto createdCustomer = customerService.createCustomer(request);
+        CustomerOutputDto createdCustomer = customerService.addCustomer(request);
         return ResponseEntity.status(201).body(createdCustomer);
     }
 

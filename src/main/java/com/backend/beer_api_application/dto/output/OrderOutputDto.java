@@ -1,13 +1,12 @@
 package com.backend.beer_api_application.dto.output;
 
-
-import java.util.ArrayList;
+import lombok.Data;
 import java.util.List;
 
+@Data
 public class OrderOutputDto {
 
-    public Long id;
-
-    public List<OrderLineOutputDto> orderLineOutputDtoList = new ArrayList<>();
-    public List<CustomerOutputDto> customerOutputDtoList = new ArrayList<>();
+    private Long id;  // Order ID
+    private String customerName;  // Name of the customer (e.g., "John Doe")
+    private List<OrderLineOutputDto> orderLines;  // List of order line details
 }

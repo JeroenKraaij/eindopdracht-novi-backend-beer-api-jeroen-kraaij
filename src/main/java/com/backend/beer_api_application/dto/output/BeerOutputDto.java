@@ -11,6 +11,7 @@ public class BeerOutputDto {
     private String name;
     private String brand;
     private String category;
+    private String beerCategoryType;
     private String description;
     private String color;
     private String brewery;
