@@ -1,102 +1,75 @@
 package com.backend.beer_api_application.services;
 
-import com.backend.beer_api_application.dtos.CustomerRegistrationRequest;
-import com.backend.beer_api_application.dtos.CustomerUpdateRequest;
-import com.backend.beer_api_application.repositories.CustomerRep;
-import com.backend.beer_api_application.exceptions.DuplicateResourceException;
-import com.backend.beer_api_application.exceptions.ResourceNotFoundException;
+import com.backend.beer_api_application.dto.input.CustomerInputDto;
+import com.backend.beer_api_application.dto.output.CustomerOutputDto;
+import com.backend.beer_api_application.dto.mapper.CustomerMapper;
+import com.backend.beer_api_application.exceptions.RecordNotFoundException;
 import com.backend.beer_api_application.models.Customer;
-import org.springframework.beans.factory.annotation.Qualifier;
+import com.backend.beer_api_application.repositories.CustomerRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomerService {
 
-    private final CustomerRep customerRep;
+    private final CustomerRepository customerRepository;
 
-    public CustomerService(@Qualifier("jpa") CustomerRep customerRep) {
-        this.customerRep = customerRep;
+    public CustomerService(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
     }
 
-    public List<Customer> getAllCustomers() {
-        return customerRep.selectAllCustomers();
+    @Transactional(readOnly = true)
+    public List<CustomerOutputDto> getAllCustomers() {
+        return customerRepository.findAll().stream()
+                .map(CustomerMapper::transferToCustomerOutputDto)
+                .collect(Collectors.toList());
     }
 
-    public Customer getCustomer(Integer id) {
-        return customerRep.selectCustomerById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Customer with id [%s] not found".formatted(id)
-                ));
+    @Transactional(readOnly = true)
+    public CustomerOutputDto getCustomerById(Long id) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new RecordNotFoundException("Customer not found with ID: " + id));
+        return CustomerMapper.transferToCustomerOutputDto(customer);
     }
 
-    public void addCustomer(CustomerRegistrationRequest customerRegistrationRequest) {
-        String email = customerRegistrationRequest.email();
-        if (customerRep.existsPersonWithEmail(email)) {
-            throw new DuplicateResourceException("Email already taken");
-        }
-
-        Customer customer = new Customer(
-                customerRegistrationRequest.firstname(),
-                customerRegistrationRequest.surname(),
-                customerRegistrationRequest.address(),
-                customerRegistrationRequest.houseNumber(),
-                customerRegistrationRequest.zipcode(),
-                customerRegistrationRequest.city(),
-                customerRegistrationRequest.email(),
-                customerRegistrationRequest.phone(),
-                customerRegistrationRequest.dateOfBirth()
-        );
-
-        customerRep.insertCustomer(customer);
+    @Transactional
+    public CustomerOutputDto addCustomer(CustomerInputDto customerInputDto) {
+        Customer customer = CustomerMapper.transferToCustomerEntity(customerInputDto);
+        Customer savedCustomer = customerRepository.save(customer);
+        return CustomerMapper.transferToCustomerOutputDto(savedCustomer);
     }
 
-    public void deleteCustomerById(Integer customerId) {
-        if (!customerRep.existsPersonWithId(customerId)) {
-            throw new ResourceNotFoundException("Customer with id [%s] not found".formatted(customerId));
-        }
+    @Transactional
+    public CustomerOutputDto updateCustomer(Long id, CustomerInputDto customerInputDto) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new RecordNotFoundException("Customer not found with ID: " + id));
 
-        customerRep.deleteCustomerById(customerId);
+        updateCustomerEntity(customer, customerInputDto);
+        Customer updatedCustomer = customerRepository.save(customer);
+
+        return CustomerMapper.transferToCustomerOutputDto(updatedCustomer);
     }
 
-    public void updateCustomer(Integer customerId, CustomerUpdateRequest updateRequest) {
-        Customer existingCustomer = customerRep.selectCustomerById(customerId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Customer with id [%s] not found".formatted(customerId)
-                ));
+    @Transactional
+    public void deleteCustomer(Long id) {
+        if (!customerRepository.existsById(id)) {
+            throw new RecordNotFoundException("Customer not found with ID: " + id);
+        }
+        customerRepository.deleteById(id);
+    }
 
-        if (updateRequest.firstname() != null && !updateRequest.firstname().isEmpty()) {
-            existingCustomer.setFirstname(updateRequest.firstname());
-        }
-        if (updateRequest.surname() != null && !updateRequest.surname().isEmpty()) {
-            existingCustomer.setSurname(updateRequest.surname());
-        }
-        if (updateRequest.address() != null && !updateRequest.address().isEmpty()) {
-            existingCustomer.setAddress(updateRequest.address());
-        }
-        if (updateRequest.houseNumber() != null && !updateRequest.houseNumber().isEmpty()) {
-            existingCustomer.setHouseNumber(updateRequest.houseNumber());
-        }
-        if (updateRequest.zipcode() != null && !updateRequest.zipcode().isEmpty()) {
-            existingCustomer.setZipcode(updateRequest.zipcode());
-        }
-        if (updateRequest.city() != null && !updateRequest.city().isEmpty()) {
-            existingCustomer.setCity(updateRequest.city());
-        }
-        if (updateRequest.email() != null && !updateRequest.email().isEmpty()) {
-            if (customerRep.existsPersonWithEmail(updateRequest.email())) {
-                throw new DuplicateResourceException("Email already taken");
-            }
-            existingCustomer.setEmail(updateRequest.email());
-        }
-        if (updateRequest.phone() != null && !updateRequest.phone().isEmpty()) {
-            existingCustomer.setPhone(updateRequest.phone());
-        }
-        if (updateRequest.dateOfBirth() != null) {
-            existingCustomer.setDateOfBirth(String.valueOf(updateRequest.dateOfBirth()));
-        }
-
-        customerRep.updateCustomer(existingCustomer);
+    private void updateCustomerEntity(Customer customer, CustomerInputDto customerInputDto) {
+        customer.setFirstname(customerInputDto.getFirstname());
+        customer.setSurname(customerInputDto.getSurname());
+        customer.setAddress(customerInputDto.getAddress());
+        customer.setHouseNumber(customerInputDto.getHouseNumber());
+        customer.setZipcode(customerInputDto.getZipcode());
+        customer.setCity(customerInputDto.getCity());
+        customer.setEmail(customerInputDto.getEmail());
+        customer.setPhone(customerInputDto.getPhone());
+        customer.setDateOfBirth(customerInputDto.getDateOfBirth());
     }
 }
