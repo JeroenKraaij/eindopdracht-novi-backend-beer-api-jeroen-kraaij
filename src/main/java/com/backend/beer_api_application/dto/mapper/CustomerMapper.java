@@ -6,6 +6,7 @@ import com.backend.beer_api_application.models.Customer;
 
 public class CustomerMapper {
 
+
     public static CustomerOutputDto transferToCustomerOutputDto(Customer customer) {
         CustomerOutputDto customerOutputDto = new CustomerOutputDto();
         customerOutputDto.setId(customer.getId());

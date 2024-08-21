@@ -9,8 +9,7 @@ import java.util.List;
 
 @Entity
 @Getter
-
-@Table(name = "Orders")
+@Table(name = "Orders")  // Use the plural for table names
 public class Order {
 
     @Id
@@ -25,18 +24,21 @@ public class Order {
 
     // One-to-many relationship with OrderLine
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Setter
     private List<OrderLine> orderLines = new ArrayList<>();
 
     // Helper methods
     public void addOrderLine(OrderLine orderLine) {
-        orderLines.add(orderLine);
-        orderLine.setOrder(this);
+        if (orderLine != null) {
+            orderLines.add(orderLine);
+            orderLine.setOrder(this);
+        }
     }
 
     public void removeOrderLine(OrderLine orderLine) {
-        orderLines.remove(orderLine);
-        orderLine.setOrder(null);
+        if (orderLine != null) {
+            orderLines.remove(orderLine);
+            orderLine.setOrder(null);
+        }
     }
 
     // Default constructor

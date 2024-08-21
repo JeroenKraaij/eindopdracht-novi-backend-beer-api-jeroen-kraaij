@@ -15,4 +15,3 @@ public class OrderInputDto {
     @NotEmpty(message = "Order must contain at least one order line")
     private List<@NotNull(message = "Order line cannot be null") OrderLineInputDto> orderLines;  // List of order line details
 }
-

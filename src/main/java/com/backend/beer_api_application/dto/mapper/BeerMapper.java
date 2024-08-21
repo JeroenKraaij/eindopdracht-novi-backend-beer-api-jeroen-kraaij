@@ -15,6 +15,7 @@ public class BeerMapper {
         BeerMapper.categoryRepository = categoryRepository;
     }
 
+
     public static BeerOutputDto transferToBeerOutputDto(Beer beer) {
         BeerOutputDto beerOutputDto = new BeerOutputDto();
         beerOutputDto.setId(beer.getId());

@@ -1,12 +1,17 @@
 package com.backend.beer_api_application.controller;
 
 import com.backend.beer_api_application.dto.input.OrderInputDto;
+import com.backend.beer_api_application.dto.mapper.CustomerMapper;
+import com.backend.beer_api_application.dto.output.CustomerOutputDto;
 import com.backend.beer_api_application.dto.output.OrderOutputDto;
 import com.backend.beer_api_application.dto.mapper.OrderMapper;
+import com.backend.beer_api_application.exceptions.RecordNotFoundException;
 import com.backend.beer_api_application.models.Customer;
 import com.backend.beer_api_application.models.Order;
+import com.backend.beer_api_application.repositories.CustomerRepository;
 import com.backend.beer_api_application.services.CustomerService;
 import com.backend.beer_api_application.services.OrderService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +29,13 @@ public class OrderController {
 
     private final OrderService orderService;
     private final CustomerService customerService;
+    private final CustomerRepository customerRepository;
 
     @Autowired
-    public OrderController(OrderService orderService, CustomerService customerService) {
+    public OrderController(OrderService orderService, CustomerService customerService, CustomerRepository customerRepository) {
         this.orderService = orderService;
         this.customerService = customerService;
+        this.customerRepository = customerRepository;
     }
 
     // Get all orders
@@ -48,30 +55,23 @@ public class OrderController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-
-
     // Create a new order
     @PostMapping("/order")
-    public ResponseEntity<OrderOutputDto> createOrder(@Valid @RequestBody OrderInputDto orderInputDto) {
-        Optional<Customer> customer = customerService.findCustomerById(orderInputDto.getCustomerId());
-        if (customer.isPresent()) {
-            Order order = OrderMapper.transferToOrderEntity(orderInputDto, customer.get());
-            Order savedOrder = orderService.saveOrder(order);
-            OrderOutputDto orderOutputDto = OrderMapper.transferToOrderOutputDto(savedOrder);
-            return ResponseEntity.status(HttpStatus.CREATED).body(orderOutputDto);  // Return 201 Created
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();  // Return 404 Not Found
-        }
+    public CustomerOutputDto getCustomerById(Long id) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new RecordNotFoundException("Customer not found with ID: " + id));
+        return CustomerMapper.transferToCustomerOutputDto(customer);
     }
+
 
     // Delete an order by ID
     @DeleteMapping("/order/{id}")
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
         if (orderService.findOrderById(id).isPresent()) {
             orderService.deleteOrderById(id);
-            return ResponseEntity.noContent().build();  // Return 204 No Content
+            return ResponseEntity.noContent().build();
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();  // Return 404 Not Found if order does not exist
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 }

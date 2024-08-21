@@ -75,3 +75,4 @@ VALUES
     ('Emily', 'Johnson', '789 Pine Road', '3C', '54321', 'Hilltown', 'emily.johnson@example.com', '555-9101', '1990-03-25'),
     ('Michael', 'Brown', '101 Cedar Lane', '4D', '98765', 'Rivercity', 'michael.brown@example.com', '555-1122', '1975-04-30'),
     ('Olivia', 'Davis', '202 Birch Boulevard', '5E', '87654', 'Lakeside', 'olivia.davis@example.com', '555-1314', '1992-05-10');
+
