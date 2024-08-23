@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Entity
 @Getter
@@ -45,8 +46,9 @@ public class OrderLine {
     // Calculate total price including VAT
     public BigDecimal getTotalPriceIncludingVat() {
         BigDecimal totalPriceExcludingVat = getTotalPriceExcludingVat();
-        return totalPriceExcludingVat.add(totalPriceExcludingVat.multiply(VAT_RATE));
+        return totalPriceExcludingVat.add(totalPriceExcludingVat.multiply(VAT_RATE).setScale(2, RoundingMode.HALF_UP));
     }
+
 
     // Default constructor
     public OrderLine() {}
