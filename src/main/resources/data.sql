@@ -1,3 +1,4 @@
+
 INSERT INTO category (id, beer_category_name, beer_category_type, beer_category_description)
 
 VALUES

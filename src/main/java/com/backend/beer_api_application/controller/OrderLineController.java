@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping(value = "api/v1")
 public class OrderLineController {
 
     private final OrderLineService orderLineService;
@@ -28,7 +28,7 @@ public class OrderLineController {
     }
 
     // Get all order lines
-    @GetMapping("/order-lines")
+    @GetMapping(value = "/order-lines")
     public ResponseEntity<List<OrderLineOutputDto>> getAllOrderLines() {
         List<OrderLine> orderLines = orderLineService.findAllOrderLines();
         List<OrderLineOutputDto> orderLineOutputDtos = orderLines.stream()
@@ -38,7 +38,7 @@ public class OrderLineController {
     }
 
     // Get an order line by ID
-    @GetMapping("/order-lines/{id}")
+    @GetMapping(value = "/order-lines/{id}")
     public ResponseEntity<OrderLineOutputDto> getOrderLineById(@PathVariable Long id) {
         Optional<OrderLine> orderLine = orderLineService.findOrderLineById(id);
         return orderLine.map(value -> ResponseEntity.ok(OrderLineMapper.transferToOrderLineOutputDto(value)))
@@ -46,7 +46,7 @@ public class OrderLineController {
     }
 
     // Create a new order line
-    @PostMapping("/order-lines")
+    @PostMapping(value = "/order-lines")
     public ResponseEntity<OrderLineOutputDto> createOrderLine(@RequestBody OrderLineInputDto orderLineInputDto) {
         return beerService.getBeerById(orderLineInputDto.getBeerId())
                 .map(beer -> {
@@ -59,7 +59,7 @@ public class OrderLineController {
     }
 
     // Delete an order line by ID
-    @DeleteMapping("/order-lines/{id}")
+    @DeleteMapping(value = "/order-lines/{id}")
     public ResponseEntity<Void> deleteOrderLine(@PathVariable Long id) {
         orderLineService.deleteOrderLineById(id);
         return ResponseEntity.noContent().build();

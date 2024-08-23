@@ -12,7 +12,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping(value = "api/v1")
 public class CategoryController {
 
     private final CategoryService categoryService;
@@ -21,19 +21,19 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    @GetMapping("/categories")
+    @GetMapping(value = "/categories")
     public ResponseEntity<List<CategoryOutputDto>> getAllCategories() {
         List<CategoryOutputDto> categories = categoryService.getAllCategories();
         return ResponseEntity.ok(categories);
     }
 
-    @GetMapping("/categories/{id}")
+    @GetMapping(value = "/categories/{id}")
     public ResponseEntity<CategoryOutputDto> getCategoryById(@PathVariable Long id) {
         CategoryOutputDto categoryOutputDto = categoryService.getCategoryById(id);
         return ResponseEntity.ok(categoryOutputDto);
     }
 
-    @PostMapping("/categories")
+    @PostMapping(value = "/categories")
     public ResponseEntity<CategoryOutputDto> createCategory(@Valid @RequestBody CategoryInputDto categoryInputDto) {
         CategoryOutputDto categoryOutputDto = categoryService.addCategory(categoryInputDto);
         URI uri = ServletUriComponentsBuilder
@@ -45,13 +45,13 @@ public class CategoryController {
         return ResponseEntity.created(uri).body(categoryOutputDto);
     }
 
-    @PutMapping("/categories/{id}")
+    @PutMapping(value = "/categories/{id}")
     public ResponseEntity<CategoryOutputDto> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryInputDto categoryInputDto) {
         CategoryOutputDto updatedCategory = categoryService.updateCategory(id, categoryInputDto);
         return ResponseEntity.ok(updatedCategory);
     }
 
-    @DeleteMapping("/categories/{id}")
+    @DeleteMapping(value = "/categories/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();

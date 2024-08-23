@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping(value = "api/v1")
 public class OrderController {
 
     private final OrderService orderService;
@@ -39,7 +39,7 @@ public class OrderController {
     }
 
     // Get all orders
-    @GetMapping("/order")
+    @GetMapping(value = "/order")
     public ResponseEntity<List<OrderOutputDto>> getAllOrders() {
         List<Order> orders = orderService.findAllOrders();
         List<OrderOutputDto> orderOutputDtos = orders.stream()
@@ -48,7 +48,7 @@ public class OrderController {
         return ResponseEntity.ok(orderOutputDtos);
     }
     // Get an order by ID
-    @GetMapping("/order/{id}")
+    @GetMapping(value = "/order/{id}")
     public ResponseEntity<OrderOutputDto> getOrderById(@PathVariable Long id) {
         Optional<Order> order = orderService.findOrderById(id);
         return order.map(value -> ResponseEntity.ok(OrderMapper.transferToOrderOutputDto(value)))
@@ -56,16 +56,15 @@ public class OrderController {
     }
 
     // Create a new order
-    @PostMapping("/order")
+    @PostMapping(value = "/order")
     public CustomerOutputDto getCustomerById(Long id) {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new RecordNotFoundException("Customer not found with ID: " + id));
         return CustomerMapper.transferToCustomerOutputDto(customer);
     }
 
-
     // Delete an order by ID
-    @DeleteMapping("/order/{id}")
+    @DeleteMapping(value = "/order/{id}")
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
         if (orderService.findOrderById(id).isPresent()) {
             orderService.deleteOrderById(id);
