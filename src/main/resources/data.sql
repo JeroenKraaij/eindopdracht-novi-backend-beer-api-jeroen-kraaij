@@ -1,6 +1,8 @@
+-- INSERT INTO roles (rolename)
+-- VALUES ('ROLE_ADMIN', 'ROLE_EDITOR', 'ROLE_USER');
+
 
 INSERT INTO category (id, beer_category_name, beer_category_type, beer_category_description)
-
 VALUES
     (1, 'Wheat Beer', 'Hefeweizen', 'Hefeweizen is a traditional wheat beer from Germany, known for its fruity and spicy flavor.'),
     (2, 'Wheat Beer', 'Witbier', 'Witbier is a Belgian style wheat beer, often brewed with coriander and orange peel.'),
@@ -77,3 +79,9 @@ VALUES
     ('Michael', 'Brown', '101 Cedar Lane', '4D', '98765', 'Rivercity', 'michael.brown@example.com', '555-1122', '1975-04-30'),
     ('Olivia', 'Davis', '202 Birch Boulevard', '5E', '87654', 'Lakeside', 'olivia.davis@example.com', '555-1314', '1992-05-10');
 
+INSERT INTO users(username, password, email, enabled, apikey)
+VALUES ('Henk', '$2a$12$Y1.YGAWx3mf.b2fWxwu59uWQN0VXisphbnxvbwW.xWUxf2QAsyAbW', 'Henk@Test.nl', true, 'abc123');
+
+INSERT INTO authorities(username, authority)
+VALUES ('Henk', 'ROLE_ADMIN'),
+        ('Henk', 'ROLE_USER');

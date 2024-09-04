@@ -21,6 +21,7 @@ public class User {
     @Setter
     private String password;
 
+    @Getter
     @OneToMany(
             targetEntity = Authority.class,
             mappedBy = "username",
@@ -41,7 +42,6 @@ public class User {
     @Setter
     private String email;
 
-    public Set<Authority> getAuthorities() { return authorities; }
     public void addAuthority(Authority authority) {
         this.authorities.add(authority);
     }

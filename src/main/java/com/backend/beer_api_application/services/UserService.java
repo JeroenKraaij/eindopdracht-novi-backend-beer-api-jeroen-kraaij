@@ -1,5 +1,6 @@
 package com.backend.beer_api_application.services;
 
+import com.backend.beer_api_application.dto.input.UserInputDto;
 import com.backend.beer_api_application.dto.mapper.UserMapper;
 import com.backend.beer_api_application.dto.output.UserOutputDto;
 import com.backend.beer_api_application.exceptions.RecordNotFoundException;
@@ -52,12 +53,11 @@ public class UserService {
     }
 
     // Create a new user
-    public String createUser(UserOutputDto userOutputDto, String rawPassword) {
+    public String createUser(UserInputDto userInputDto) {
         String randomString = RandomStringGenerator.generateAlphaNumeric(20);
-        userOutputDto.setApikey(randomString);
-
-        User newUser = UserMapper.toEntity(userOutputDto);
-        newUser.setPassword(passwordEncoder.encode(rawPassword));  // Handle password encryption
+        User newUser = UserMapper.toEntity(userInputDto);
+        newUser.setApikey(randomString);
+        newUser.setPassword(passwordEncoder.encode(userInputDto.getPassword()));  // Handle password encryption
         userRepository.save(newUser);
 
         return newUser.getUsername();

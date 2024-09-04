@@ -1,5 +1,6 @@
 package com.backend.beer_api_application.dto.mapper;
 
+import com.backend.beer_api_application.dto.input.UserInputDto;
 import com.backend.beer_api_application.dto.output.UserOutputDto;
 import com.backend.beer_api_application.models.User;
 
@@ -17,13 +18,10 @@ public class UserMapper {
     }
 
     // Convert UserOutputDto to User entity
-    public static User toEntity(UserOutputDto dto) {
+    public static User toEntity(UserInputDto dto) {
         User user = new User();
-        user.setUsername(dto.getUsername());
-        user.setEnabled(dto.getEnabled());
-        user.setApikey(dto.getApikey());
+        user.setUsername(dto.getUserName());
         user.setEmail(dto.getEmail());
-        user.getAuthorities().addAll(dto.getAuthorities());
         return user;
     }
 }
