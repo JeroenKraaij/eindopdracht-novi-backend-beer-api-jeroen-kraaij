@@ -11,6 +11,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,47 +47,51 @@ public class SpringSecurityConfig {
     @Bean
     protected SecurityFilterChain filter(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-                .httpBasic(basic -> basic.disable())
+                .csrf(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
 
                         // BeerController endpoints
                         .requestMatchers(HttpMethod.POST, "/api/v1/beers").hasAnyRole("ADMIN", "EDITOR")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/beers").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/beers/{id}").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/beers").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/beers/{id}").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/beers/{id}").hasAnyRole("ADMIN", "EDITOR")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/beers/{id}").hasRole("ADMIN")
 
                         // CategoryController endpoints
                         .requestMatchers(HttpMethod.POST, "/api/v1/categories").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/categories").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/categories/{id}").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/categories").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/categories/{id}").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/categories/{id}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/categories/{id}").hasRole("ADMIN")
 
                         // CustomerController endpoints
-                        .requestMatchers(HttpMethod.POST, "/api/v1/customers").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/customers").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/customers/{id}").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/customers/{id}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/customers/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/customers").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/customers").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/customers/{id}").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/customers/{id}").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/customers/{id}").hasAnyRole("ADMIN", "USER")
 
                         // OrderController endpoints
-                        .requestMatchers(HttpMethod.POST, "/api/v1/order").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/order").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/order").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/order/{id}").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/order/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/order/{id}").hasAnyRole("ADMIN", "USER")
 
                         // OrderLineController endpoints
-                        .requestMatchers(HttpMethod.POST, "/api/v1/order-lines").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/order-lines").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/order-lines").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/order-lines/{id}").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/order-lines/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/order-lines/{id}").hasAnyRole("ADMIN", "USER")
+
+                        // USER
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+
 
                         // Common/public endpoints
-                        .requestMatchers("/authenticated").authenticated()
-                        .requestMatchers("/authenticate").permitAll()
+                        .requestMatchers("/api/v1/authenticated").authenticated()
+                        .requestMatchers("/api/v1/authenticate").permitAll()
 
                         // Deny any other requests
                         .anyRequest().denyAll()

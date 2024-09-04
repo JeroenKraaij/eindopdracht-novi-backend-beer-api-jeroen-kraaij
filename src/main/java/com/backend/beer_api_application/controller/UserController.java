@@ -1,5 +1,6 @@
 package com.backend.beer_api_application.controller;
 
+import com.backend.beer_api_application.dto.input.UserInputDto;
 import com.backend.beer_api_application.dto.output.UserOutputDto;
 import com.backend.beer_api_application.exceptions.RequestValidationException;
 import com.backend.beer_api_application.services.UserService;
@@ -35,18 +36,10 @@ public class UserController {
     }
 
     @PostMapping(value = "/users")
-    public ResponseEntity<UserOutputDto> createUser(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<UserOutputDto> createUser(@RequestBody UserInputDto userInputDto) {
         try {
-            String username = (String) request.get("username");
-            String rawPassword = (String) request.get("password");  // Extract password from request
-            String email = (String) request.get("email");
 
-            UserOutputDto userDto = new UserOutputDto();
-            userDto.setUsername(username);
-            userDto.setEmail(email);
-            // Set other fields as needed
-
-            String newUsername = userService.createUser(userDto, rawPassword);
+            String newUsername = userService.createUser(userInputDto);
             userService.addAuthority(newUsername, "ROLE_USER");
 
             URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{username}")
@@ -63,12 +56,11 @@ public class UserController {
         try {
             String email = (String) request.get("email");
             Boolean enabled = (Boolean) request.get("enabled");
-            String newRawPassword = (String) request.get("password");  // Optional password update
+            String newRawPassword = (String) request.get("password");
 
             UserOutputDto userDto = new UserOutputDto();
             userDto.setEmail(email);
             userDto.setEnabled(enabled);
-            // Set other fields as needed
 
             userService.updateUser(username, userDto, newRawPassword);
 
