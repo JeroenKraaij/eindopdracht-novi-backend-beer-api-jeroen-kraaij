@@ -3,7 +3,9 @@ package com.backend.beer_api_application.dto.mapper;
 import com.backend.beer_api_application.dto.input.UserInputDto;
 import com.backend.beer_api_application.dto.output.UserOutputDto;
 import com.backend.beer_api_application.models.User;
+import org.springframework.stereotype.Service;
 
+@Service
 public class UserMapper {
 
     // Convert User entity to UserOutputDto

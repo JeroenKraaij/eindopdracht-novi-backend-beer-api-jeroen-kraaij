@@ -6,7 +6,9 @@ import com.backend.beer_api_application.exceptions.RecordNotFoundException;
 import com.backend.beer_api_application.models.Beer;
 import com.backend.beer_api_application.models.Category;
 import com.backend.beer_api_application.repositories.CategoryRepository;
+import org.springframework.stereotype.Service;
 
+@Service
 public class BeerMapper {
 
     private static CategoryRepository categoryRepository;

@@ -42,9 +42,15 @@ public class User {
     @Setter
     private String email;
 
+    // One-to-One relationship with Customer
+    @OneToOne(mappedBy = "user") // Bidirectional mapping, Customer owns the relationship
+    @Setter
+    private Customer customer;
+    
     public void addAuthority(Authority authority) {
         this.authorities.add(authority);
     }
+
     public void removeAuthority(Authority authority) {
         this.authorities.remove(authority);
     }

@@ -40,10 +40,6 @@ public class Customer {
     @Setter
     private String city;
 
-    @Column(unique = true)
-    @Setter
-    private String email;
-
     @Column
     @Setter
     private String phone;
@@ -52,16 +48,18 @@ public class Customer {
     @Setter
     private String dateOfBirth;
 
-    // One-to-many relationship with Order
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     @Setter
     private List<Order> orders = new ArrayList<>();
 
-    // Default constructor
+    @OneToOne
+    @JoinColumn(name = "user_customer", referencedColumnName = "username")
+    @Setter
+    private User user;
+
     public Customer() {
     }
 
-    // Helper methods to manage orders
     public void addOrder(Order order) {
         orders.add(order);
         order.setCustomer(this);

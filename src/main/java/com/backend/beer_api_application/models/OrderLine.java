@@ -9,6 +9,7 @@ import java.math.RoundingMode;
 
 @Entity
 @Getter
+@Table(name = "orderlines")
 public class OrderLine {
 
     @Id
@@ -27,29 +28,40 @@ public class OrderLine {
     @Setter
     private Order order;
 
+    // Quantity of beers in the order
     @Column(nullable = false)
     @Setter
     private Integer amount;
 
-    @Column(nullable = false)
+    // Price at the time of purchase
+    @Column(nullable = false, precision = 10, scale = 2)
     @Setter
     private BigDecimal priceAtPurchase;
 
     // VAT constant (21%)
     private static final BigDecimal VAT_RATE = BigDecimal.valueOf(0.21);
 
+    // Constructor for initialization
+    public OrderLine(Beer beer, Integer amount, BigDecimal priceAtPurchase) {
+        this.beer = beer;
+        this.amount = amount;
+        this.priceAtPurchase = priceAtPurchase;
+    }
+
+    // Default constructor
+    public OrderLine() {}
+
     // Calculate total price excluding VAT
     public BigDecimal getTotalPriceExcludingVat() {
-        return priceAtPurchase.multiply(BigDecimal.valueOf(amount));
+        return priceAtPurchase.multiply(BigDecimal.valueOf(amount))
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
     // Calculate total price including VAT
     public BigDecimal getTotalPriceIncludingVat() {
         BigDecimal totalPriceExcludingVat = getTotalPriceExcludingVat();
-        return totalPriceExcludingVat.add(totalPriceExcludingVat.multiply(VAT_RATE).setScale(2, RoundingMode.HALF_UP));
+        return totalPriceExcludingVat
+                .add(totalPriceExcludingVat.multiply(VAT_RATE))
+                .setScale(2, RoundingMode.HALF_UP);
     }
-
-
-    // Default constructor
-    public OrderLine() {}
 }

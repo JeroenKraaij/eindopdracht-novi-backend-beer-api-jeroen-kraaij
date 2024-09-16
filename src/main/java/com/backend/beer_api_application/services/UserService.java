@@ -5,7 +5,9 @@ import com.backend.beer_api_application.dto.mapper.UserMapper;
 import com.backend.beer_api_application.dto.output.UserOutputDto;
 import com.backend.beer_api_application.exceptions.RecordNotFoundException;
 import com.backend.beer_api_application.models.Authority;
+import com.backend.beer_api_application.models.Customer;
 import com.backend.beer_api_application.models.User;
+import com.backend.beer_api_application.repositories.CustomerRepository;
 import com.backend.beer_api_application.repositories.UserRepository;
 import com.backend.beer_api_application.utils.RandomStringGenerator;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,10 +23,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CustomerRepository customerRepository;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, CustomerRepository customerRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.customerRepository = customerRepository;
     }
 
     // Fetch all users

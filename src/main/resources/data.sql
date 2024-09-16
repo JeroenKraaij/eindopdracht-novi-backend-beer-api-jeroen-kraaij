@@ -1,6 +1,17 @@
--- INSERT INTO roles (rolename)
--- VALUES ('ROLE_ADMIN', 'ROLE_EDITOR', 'ROLE_USER');
-
+INSERT INTO taste (id, name)
+VALUES
+    (1, 'Mango'),
+    (2, 'Koffie'),
+    (3, 'Vanille'),
+    (4, 'Noten'),
+    (5, 'Karamel'),
+    (6, 'Gember'),
+    (7, 'Banaan'),
+    (8, 'Citrus'),
+    (9, 'Chocola'),
+    (10, 'Kaneel'),
+    (11, 'Honing'),
+    (12, 'Peper');
 
 INSERT INTO category (id, beer_category_name, beer_category_type, beer_category_description)
 VALUES
@@ -51,7 +62,7 @@ VALUES
 
 
 
-INSERT INTO beer (id, name, brand, description, color, brewery, country, abv, ibu, food, temperature, glassware, taste, price, image_url, category_id)
+INSERT INTO beers (id, name, brand, description, color, brewery, country, abv, ibu, food, temperature, glassware, taste, price, image_url, beer_category)
 VALUES
     (1, 'Pilsner Urquell', 'Plzensky Prazdroj', 'A crisp, golden lager with a slightly sweet, malty flavor.', 'Golden', 'Pilsner Urquell Brewery', 'Czech Republic', 4.4, 40, 'Grilled Chicken, Cheese', '6-8°C', 'Pilsner Glass', 'Crisp, Malty, Bitter', 2.99, 'https://example.com/pilsner_urquell.jpg', 25),
     (2, 'Guinness Draught', 'Guinness', 'Rich and creamy with coffee and chocolate notes.', 'Dark', 'Guinness Brewery', 'Ireland', 4.2, 45, 'Stew, Shellfish', '6-8°C', 'Stout Glass', 'Creamy, Roasted, Bitter', 3.99, 'https://example.com/guinness_draught.jpg', 20),
@@ -69,19 +80,18 @@ VALUES
     (14, 'Stella Artois', 'Anheuser-Busch InBev', 'A crisp, slightly bitter Belgian lager.', 'Pale', 'Stella Artois Brewery', 'Belgium', 5.2, 25, 'Salads, Seafood', '3-5°C', 'Chalice', 'Crisp, Bitter, Refreshing', 2.79, 'https://example.com/stella_artois.jpg', 26),
     (15, 'Brooklyn Lager', 'Brooklyn Brewery', 'A hoppy amber lager with a floral aroma and a dry finish.', 'Amber', 'Brooklyn Brewery', 'USA', 5.2, 30, 'Pizza, Burgers', '6-8°C', 'Pint Glass', 'Hoppy, Floral, Dry', 4.29, 'https://example.com/brooklyn_lager.jpg', 17);
 
-
-
-INSERT INTO customers (firstname, surname, address, house_number, zipcode, city, email, phone, date_of_birth)
+INSERT INTO customers (firstname, surname, address, house_number, zipcode, city, phone, date_of_birth)
 VALUES
-    ('John', 'Doe', '123 Maple Street', '10A', '12345', 'Springfield', 'john.doe@example.com', '555-1234', '1980-01-15'),
-    ('Jane', 'Smith', '456 Oak Avenue', '22B', '67890', 'Greenville', 'jane.smith@example.com', '555-5678', '1985-02-20'),
-    ('Emily', 'Johnson', '789 Pine Road', '3C', '54321', 'Hilltown', 'emily.johnson@example.com', '555-9101', '1990-03-25'),
-    ('Michael', 'Brown', '101 Cedar Lane', '4D', '98765', 'Rivercity', 'michael.brown@example.com', '555-1122', '1975-04-30'),
-    ('Olivia', 'Davis', '202 Birch Boulevard', '5E', '87654', 'Lakeside', 'olivia.davis@example.com', '555-1314', '1992-05-10');
+    ('John', 'Doe', '123 Maple Street', '10A', '12345', 'Springfield',  '555-1234', '1980-01-15'),
+    ('Jane', 'Smith', '456 Oak Avenue', '22B', '67890', 'Greenville',  '555-5678', '1985-02-20'),
+    ('Emily', 'Johnson', '789 Pine Road', '3C', '54321', 'Hilltown',  '555-9101', '1990-03-25'),
+    ('Michael', 'Brown', '101 Cedar Lane', '4D', '98765', 'Rivercity', '555-1122', '1975-04-30'),
+    ('Olivia', 'Davis', '202 Birch Boulevard', '5E', '87654', 'Lakeside', '555-1314', '1992-05-10');
 
 INSERT INTO users(username, password, email, enabled, apikey)
-VALUES ('Henk', '$2a$12$Y1.YGAWx3mf.b2fWxwu59uWQN0VXisphbnxvbwW.xWUxf2QAsyAbW', 'Henk@Test.nl', true, 'abc123');
+VALUES
+    ('AdminJeroen', '$2a$12$Y1.YGAWx3mf.b2fWxwu59uWQN0VXisphbnxvbwW.xWUxf2QAsyAbW', 'jeroen.admin@test.nl', true, 'abc123');
 
 INSERT INTO authorities(username, authority)
-VALUES ('Henk', 'ROLE_ADMIN'),
-        ('Henk', 'ROLE_USER');
+VALUES
+    ('AdminJeroen', 'ROLE_ADMIN');

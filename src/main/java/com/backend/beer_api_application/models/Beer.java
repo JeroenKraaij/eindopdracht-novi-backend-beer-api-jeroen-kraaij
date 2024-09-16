@@ -10,6 +10,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@Table(name = "beers")
 public class Beer {
 
     @Id
@@ -23,15 +24,6 @@ public class Beer {
     @Column(nullable = false)
     @Setter
     private String brand;
-
-    @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
-    @Setter
-    private Category category;
-
-    public String getBeerCategoryType() {
-        return category != null ? category.getBeerCategoryType() : null;
-    }
 
     @Column(length = 1000, nullable = false)
     @Setter
@@ -71,6 +63,22 @@ public class Beer {
 
     @Setter
     private String imageUrl;
+
+    // Many-to-One relationship with Category
+    @ManyToOne
+    @JoinColumn(name = "beer_category", nullable = false)
+    @Setter
+    private Category category;
+
+    public String getBeerCategoryType() {
+        return category != null ? category.getBeerCategoryType() : null;
+    }
+
+    // Many-to-Many relationship with Tastes
+    @ManyToMany
+    @JoinTable(name = "beer_taste")
+    @Setter
+    private List<Taste> tastes = new ArrayList<>();
 
     // One-to-many relationship with OrderLine
     @OneToMany(mappedBy = "beer", cascade = CascadeType.ALL, orphanRemoval = true)

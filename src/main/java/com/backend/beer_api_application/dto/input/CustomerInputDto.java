@@ -3,6 +3,8 @@ package com.backend.beer_api_application.dto.input;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Data
 public class CustomerInputDto {
 
@@ -30,15 +32,10 @@ public class CustomerInputDto {
     @Size(max = 100, message = "City can be at most 100 characters")
     private String city;
 
-    @NotBlank(message = "Email is mandatory")
-    @Email(message = "Email should be valid")
-    @Size(max = 200, message = "Email can be at most 200 characters")
-    private String email;
-
-    @Pattern(regexp = "^[+]?[0-9]{10,15}$", message = "Phone number should be valid")
+    @Pattern(regexp = "^[+]?[0-9]{2}-[0-9]{7,13}$", message = "Phone number should be valid")
     @Size(max = 15, message = "Phone number can be at most 15 characters")
     private String phone;
 
     @Past(message = "Date of birth must be in the past")
-    private String dateOfBirth;
+    private LocalDate dateOfBirth;
 }
