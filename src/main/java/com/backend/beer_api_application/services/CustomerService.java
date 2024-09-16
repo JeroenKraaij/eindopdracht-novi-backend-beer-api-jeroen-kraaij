@@ -5,20 +5,26 @@ import com.backend.beer_api_application.dto.output.CustomerOutputDto;
 import com.backend.beer_api_application.dto.mapper.CustomerMapper;
 import com.backend.beer_api_application.exceptions.RecordNotFoundException;
 import com.backend.beer_api_application.models.Customer;
+import com.backend.beer_api_application.models.User;
 import com.backend.beer_api_application.repositories.CustomerRepository;
+import com.backend.beer_api_application.repositories.UserRepository;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final UserRepository userRepository;
 
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository, UserRepository userRepository) {
         this.customerRepository = customerRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional(readOnly = true)
@@ -36,8 +42,11 @@ public class CustomerService {
     }
 
     @Transactional
-    public CustomerOutputDto addCustomer(CustomerInputDto customerInputDto) {
+    public CustomerOutputDto addCustomer(CustomerInputDto customerInputDto, Authentication userDetails) {
+
+        Optional<User> user = userRepository.findUserByUsername(userDetails.getName());
         Customer customer = CustomerMapper.transferToCustomerEntity(customerInputDto);
+        customer.setUser(user.get());
         Customer savedCustomer = customerRepository.save(customer);
         return CustomerMapper.transferToCustomerOutputDto(savedCustomer);
     }
@@ -68,8 +77,7 @@ public class CustomerService {
         customer.setHouseNumber(customerInputDto.getHouseNumber());
         customer.setZipcode(customerInputDto.getZipcode());
         customer.setCity(customerInputDto.getCity());
-        customer.setEmail(customerInputDto.getEmail());
         customer.setPhone(customerInputDto.getPhone());
-        customer.setDateOfBirth(customerInputDto.getDateOfBirth());
+        customer.setDateOfBirth(customerInputDto.getDateOfBirth().toString());
     }
 }

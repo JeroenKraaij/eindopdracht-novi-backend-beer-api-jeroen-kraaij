@@ -4,7 +4,9 @@ import com.backend.beer_api_application.dto.input.OrderLineInputDto;
 import com.backend.beer_api_application.dto.output.OrderLineOutputDto;
 import com.backend.beer_api_application.models.OrderLine;
 import com.backend.beer_api_application.models.Beer;
+import org.springframework.stereotype.Service;
 
+@Service
 public class OrderLineMapper {
 
     // Converts an OrderLine entity to an OrderLineOutputDto
@@ -23,8 +25,8 @@ public class OrderLineMapper {
     public static OrderLine transferToOrderLineEntity(OrderLineInputDto dto, Beer beer) {
         OrderLine orderLine = new OrderLine();
         orderLine.setBeer(beer);  // Beer is already resolved from the BeerRepository or service
-        orderLine.setAmount(dto.getAmount());
-        orderLine.setPriceAtPurchase(dto.getPriceAtPurchase());
+        orderLine.setAmount(dto.getQuantity());
+        orderLine.setPriceAtPurchase(orderLine.getTotalPriceIncludingVat());
         return orderLine;
     }
 }

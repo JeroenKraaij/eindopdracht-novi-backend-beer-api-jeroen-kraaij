@@ -5,8 +5,11 @@ import com.backend.beer_api_application.dto.output.CustomerOutputDto;
 import com.backend.beer_api_application.services.CustomerService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -36,7 +39,8 @@ public class CustomerController {
     // Create a Customer
     @PostMapping(value = "/customers")
     public ResponseEntity<CustomerOutputDto> createCustomer(@Valid @RequestBody CustomerInputDto request) {
-        CustomerOutputDto createdCustomer = customerService.addCustomer(request);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomerOutputDto createdCustomer = customerService.addCustomer(request, authentication);
         return ResponseEntity.status(201).body(createdCustomer);
     }
 

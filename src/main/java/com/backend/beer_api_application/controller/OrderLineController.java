@@ -58,6 +58,37 @@ public class OrderLineController {
                 .orElse(ResponseEntity.badRequest().build());
     }
 
+    // Update an order line by ID
+    @PutMapping(value = "/order-lines/{id}")
+    public ResponseEntity<OrderLineOutputDto> updateOrderLine(
+            @PathVariable Long id,
+            @RequestBody OrderLineInputDto orderLineInputDto) {
+
+        Optional<OrderLine> optionalOrderLine = orderLineService.findOrderLineById(id);
+
+        if (optionalOrderLine.isPresent()) {
+            OrderLine existingOrderLine = optionalOrderLine.get();
+
+            return beerService.getBeerById(orderLineInputDto.getBeerId())
+                    .map(beer -> {
+
+                        existingOrderLine.setBeer(beer);
+                        existingOrderLine.setAmount(orderLineInputDto.getQuantity());
+                        existingOrderLine.setPriceAtPurchase(orderLineInputDto.getPrice());
+
+                        OrderLine updatedOrderLine = orderLineService.saveOrderLine(existingOrderLine);
+
+                        OrderLineOutputDto orderLineOutputDto = OrderLineMapper.transferToOrderLineOutputDto(updatedOrderLine);
+
+                        return ResponseEntity.ok(orderLineOutputDto);
+                    })
+                    .orElse(ResponseEntity.badRequest().build()); // Beer ID not valid
+
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     // Delete an order line by ID
     @DeleteMapping(value = "/order-lines/{id}")
     public ResponseEntity<Void> deleteOrderLine(@PathVariable Long id) {
