@@ -1,41 +1,51 @@
 package com.backend.beer_api_application.services;
 
-import com.backend.beer_api_application.emum.OrderStatus;
+import com.backend.beer_api_application.enums.OrderStatus;
 import com.backend.beer_api_application.exceptions.OrderNotFoundException;
 import com.backend.beer_api_application.models.Customer;
 import com.backend.beer_api_application.models.Order;
 import com.backend.beer_api_application.models.OrderLine;
 import com.backend.beer_api_application.repositories.OrderRepository;
+import com.backend.beer_api_application.utils.OrderServiceHelper;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderServiceHelper orderServiceHelper;
 
     @Autowired
-    public OrderService(OrderRepository orderRepository) {
+    public OrderService(OrderRepository orderRepository, OrderServiceHelper orderServiceHelper) {
         this.orderRepository = orderRepository;
-
+        this.orderServiceHelper = orderServiceHelper;
     }
 
-    // Create a new order with default PENDING status
+    // Find all orders
     @Transactional
-    public Order processNewOrder(Customer customer, List<OrderLine> orderLines) {
+    public List<Order> findAllOrders() {
+        return orderRepository.findAll();
+    }
+
+    // Find an order by ID
+    @Transactional
+    public Order findOrderById(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order with ID " + orderId + " not found"));
+    }
+
+    // Create a new order
+    @Transactional
+    public Order addNewOrder(Customer customer, List<OrderLine> orderLines) {
         Order newOrder = new Order();
         newOrder.setCustomer(customer);
-        newOrder.setOrderStatus(OrderStatus.PENDING);  // Default status
+        newOrder.setOrderStatus(OrderStatus.PENDING);
 
-        for (OrderLine orderLine : orderLines) {
-            newOrder.addOrderLine(orderLine);
-        }
-
-        newOrder.calculateTotalAmounts();
+        orderServiceHelper.addOrderLinesToOrder(newOrder, orderLines);
 
         return orderRepository.save(newOrder);
     }
@@ -43,63 +53,33 @@ public class OrderService {
     // Update the status of an order
     @Transactional
     public Order updateOrderStatus(Long orderId, OrderStatus newStatus) {
-        Optional<Order> optionalOrder = orderRepository.findById(orderId);
-        if (optionalOrder.isPresent()) {
-            Order order = optionalOrder.get();
-            order.setOrderStatus(newStatus);
-            return orderRepository.save(order);
-        } else {
-            throw new OrderNotFoundException("Order with ID " + orderId + " not found");
-        }
+        Order order = orderServiceHelper.getOrderById(orderId);
+        order.setOrderStatus(newStatus);
+        return orderRepository.save(order);
     }
 
-    // Add an OrderLine to an existing order
+    // Add OrderLines to an existing order
     @Transactional
-    public Optional<Order> addOrderLineToOrder(Long orderId, OrderLine orderLine) {
-        Optional<Order> optionalOrder = orderRepository.findById(orderId);
-        if (optionalOrder.isPresent()) {
-            Order order = optionalOrder.get();
-            order.addOrderLine(orderLine);
-            orderRepository.save(order);
-            return Optional.of(order);
-        } else {
-            throw new OrderNotFoundException("Order with ID " + orderId + " not found");
-        }
+    public Order addOrderLineToOrder(Long orderId, OrderLine orderLine) {
+        Order order = orderServiceHelper.getOrderById(orderId);
+        orderServiceHelper.addOrderLine(order, orderLine);
+        return orderRepository.save(order);
     }
 
-    // Remove an OrderLine from an existing order
+    // Remove an OrderLine from an order
     @Transactional
-    public Optional<Order> removeOrderLineFromOrder(Long orderId, Long orderLineId) {
-        Optional<Order> optionalOrder = orderRepository.findById(orderId);
-        if (optionalOrder.isPresent()) {
-            Order order = optionalOrder.get();
-            order.getOrderLines().removeIf(ol -> ol.getId().equals(orderLineId));
-            orderRepository.save(order);  // Persist changes
-            return Optional.of(order);
-        } else {
-            throw new OrderNotFoundException("Order with ID " + orderId + " not found");
-        }
-    }
-
-    // Find an order by ID
-    @Transactional(readOnly = true)
-    public Optional<Order> findOrderById(Long id) {
-        return orderRepository.findById(id);
-    }
-
-    // Find all orders
-    @Transactional(readOnly = true)
-    public List<Order> findAllOrders() {
-        return orderRepository.findAll();
+    public Order removeOrderLineFromOrder(Long orderId, Long orderLineId) {
+        Order order = orderServiceHelper.getOrderById(orderId);
+        orderServiceHelper.removeOrderLine(order, orderLineId);
+        return orderRepository.save(order);
     }
 
     // Delete an order by ID
     @Transactional
     public void deleteOrderById(Long id) {
-        if (orderRepository.existsById(id)) {
-            orderRepository.deleteById(id);
-        } else {
+        if (!orderRepository.existsById(id)) {
             throw new OrderNotFoundException("Order with ID " + id + " not found");
         }
+        orderRepository.deleteById(id);
     }
 }

@@ -41,11 +41,11 @@ public class OrderLine {
     // VAT constant (21%)
     private static final BigDecimal VAT_RATE = BigDecimal.valueOf(0.21);
 
-    // Constructor for initialization
-    public OrderLine(Beer beer, Integer amount, BigDecimal priceAtPurchase) {
+    // Constructor for initialization - priceAtPurchase is set to the current price of the beer
+    public OrderLine(Beer beer, Integer amount) {
         this.beer = beer;
         this.amount = amount;
-        this.priceAtPurchase = priceAtPurchase;
+        this.priceAtPurchase = beer.getPrice(); // Get the current price from the Beer entity
     }
 
     // Default constructor

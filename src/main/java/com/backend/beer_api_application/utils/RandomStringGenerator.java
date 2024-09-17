@@ -1,7 +1,10 @@
 package com.backend.beer_api_application.utils;
 
+import org.springframework.stereotype.Service;
+
 import java.util.Random;
 
+@Service
 public class RandomStringGenerator {
 
     public static String generateAlphaNumeric(int length) {

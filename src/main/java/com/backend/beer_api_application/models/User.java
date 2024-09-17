@@ -21,6 +21,10 @@ public class User {
     @Setter
     private String password;
 
+    @Column
+    @Setter
+    private String email;
+
     @Getter
     @OneToMany(
             targetEntity = Authority.class,
@@ -38,12 +42,10 @@ public class User {
     @Setter
     private String apikey;
 
-    @Column
-    @Setter
-    private String email;
+
 
     // One-to-One relationship with Customer
-    @OneToOne(mappedBy = "user") // Bidirectional mapping, Customer owns the relationship
+    @OneToOne(mappedBy = "user")
     @Setter
     private Customer customer;
     

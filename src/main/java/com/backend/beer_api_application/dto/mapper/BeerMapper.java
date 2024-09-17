@@ -11,44 +11,22 @@ import org.springframework.stereotype.Service;
 @Service
 public class BeerMapper {
 
-    private static CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
 
     public BeerMapper(CategoryRepository categoryRepository) {
-        BeerMapper.categoryRepository = categoryRepository;
+        this.categoryRepository = categoryRepository;
     }
 
-
-    public static BeerOutputDto transferToBeerOutputDto(Beer beer) {
-        BeerOutputDto beerOutputDto = new BeerOutputDto();
-        beerOutputDto.setId(beer.getId());
-        beerOutputDto.setName(beer.getName());
-        beerOutputDto.setBrand(beer.getBrand());
-
-        if (beer.getCategory() != null) {
-            beerOutputDto.setCategory(beer.getCategory().getBeerCategoryName());
-            beerOutputDto.setBeerCategoryType(beer.getCategory().getBeerCategoryType());
-        }
-        else {
-            beerOutputDto.setCategory(null);
-            beerOutputDto.setBeerCategoryType(null);
-        }
-
-        beerOutputDto.setDescription(beer.getDescription());
-        beerOutputDto.setColor(beer.getColor());
-        beerOutputDto.setBrewery(beer.getBrewery());
-        beerOutputDto.setCountry(beer.getCountry());
-        beerOutputDto.setAbv(beer.getAbv() + " %");
-        beerOutputDto.setIbu(beer.getIbu());
-        beerOutputDto.setFood(beer.getFood());
-        beerOutputDto.setTemperature(beer.getTemperature() + " °C");
-        beerOutputDto.setGlassware(beer.getGlassware());
-        beerOutputDto.setTaste(beer.getTaste());
-        beerOutputDto.setPrice(beer.getPrice());
-        beerOutputDto.setImageUrl(beer.getImageUrl());
-        return beerOutputDto;
+    public BeerOutputDto transferToBeerOutputDto(Beer beer) {
+        BeerOutputDto dto = new BeerOutputDto();
+        dto.setId(beer.getId());
+        dto.setName(beer.getName());
+        dto.setBrand(beer.getBrand());
+        dto.setPrice(beer.getPrice());
+        return dto;
     }
 
-    public static Beer transferToBeerEntity(BeerInputDto beerInputDto) {
+    public Beer transferToBeerEntity(BeerInputDto beerInputDto) {
         Beer beer = new Beer();
         beer.setName(beerInputDto.getName());
         beer.setBrand(beerInputDto.getBrand());
@@ -57,6 +35,7 @@ public class BeerMapper {
                 .orElseThrow(() -> new RecordNotFoundException("Category not found with ID " + beerInputDto.getCategory()));
         beer.setCategory(category);
 
+        // map other fields from beerInputDto to beer...
         beer.setDescription(beerInputDto.getDescription());
         beer.setColor(beerInputDto.getColor());
         beer.setBrewery(beerInputDto.getBrewery());

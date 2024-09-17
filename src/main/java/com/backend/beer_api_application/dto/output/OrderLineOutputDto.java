@@ -7,10 +7,22 @@ import java.math.BigDecimal;
 @Data
 public class OrderLineOutputDto {
 
-    private Long id;
-    private String beerName;
-    private Integer amount;
-    private BigDecimal priceAtPurchase;
-    private BigDecimal totalPriceExcludingVat;
-    private BigDecimal totalPriceIncludingVat;
+    private Long id;  // Unique identifier for the order line
+
+    // Beer details
+    private Long beerId;  // Beer ID for reference
+    private String beerName;  // Name of the beer
+    private String beerType;  // Type of the beer (optional for further beer categorization)
+
+    // Order line details
+    private Integer amount;  // Quantity of the beer in this order line
+    private BigDecimal priceAtPurchase;  // Unit price of the beer at the time of purchase
+
+    // Total prices
+    private BigDecimal totalPriceExcludingVat;  // Total price excluding VAT
+    private BigDecimal totalPriceIncludingVat;  // Total price including VAT
+
+    // VAT details
+    private BigDecimal vatAmount;  // Amount of VAT
+    private BigDecimal vatPercentage;  // VAT percentage applied on this order line
 }

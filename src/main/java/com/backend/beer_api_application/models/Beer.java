@@ -29,9 +29,11 @@ public class Beer {
     @Setter
     private String description;
 
+    @Column(nullable = false)
     @Setter
     private String color;
 
+    @Column(nullable = false)
     @Setter
     private String brewery;
 
@@ -42,29 +44,33 @@ public class Beer {
     @Setter
     private Float abv;
 
+    @Column(nullable = false)
     @Setter
     private Integer ibu;
 
     @Setter
     private String food;
 
+    @Column(nullable = false)
     @Setter
     private String temperature;
 
+    @Column(nullable = false)
     @Setter
     private String glassware;
 
+    @Column(nullable = false)
     @Setter
     private String taste;
 
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 10, scale = 2)
     @Setter
     private BigDecimal price;
 
+    @Column(nullable = false)
     @Setter
     private String imageUrl;
 
-    // Many-to-One relationship with Category
     @ManyToOne
     @JoinColumn(name = "beer_category", nullable = false)
     @Setter
@@ -74,20 +80,16 @@ public class Beer {
         return category != null ? category.getBeerCategoryType() : null;
     }
 
-    // Many-to-Many relationship with Tastes
     @ManyToMany
     @JoinTable(name = "beer_taste")
     @Setter
     private List<Taste> tastes = new ArrayList<>();
 
-    // One-to-many relationship with OrderLine
     @OneToMany(mappedBy = "beer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderLine> orderLines = new ArrayList<>();
 
-    // Default constructor
     public Beer() {}
 
-    // Helper methods to manage the order lines
     public void addOrderLine(OrderLine orderLine) {
         orderLines.add(orderLine);
         orderLine.setBeer(this);
