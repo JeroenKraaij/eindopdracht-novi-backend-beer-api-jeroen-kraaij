@@ -6,12 +6,13 @@ import com.backend.beer_api_application.dto.output.OrderLineOutputDto;
 import com.backend.beer_api_application.models.OrderLine;
 import com.backend.beer_api_application.services.BeerService;
 import com.backend.beer_api_application.services.OrderLineService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -20,11 +21,14 @@ public class OrderLineController {
 
     private final OrderLineService orderLineService;
     private final BeerService beerService;
+    private final OrderLineMapper orderLineMapper;
 
     @Autowired
-    public OrderLineController(OrderLineService orderLineService, BeerService beerService) {
+    public OrderLineController(OrderLineService orderLineService, BeerService beerService,
+                               OrderLineMapper orderLineMapper) {
         this.orderLineService = orderLineService;
         this.beerService = beerService;
+        this.orderLineMapper = orderLineMapper;
     }
 
     // Get all order lines
@@ -32,7 +36,7 @@ public class OrderLineController {
     public ResponseEntity<List<OrderLineOutputDto>> getAllOrderLines() {
         List<OrderLine> orderLines = orderLineService.findAllOrderLines();
         List<OrderLineOutputDto> orderLineOutputDtos = orderLines.stream()
-                .map(OrderLineMapper::transferToOrderLineOutputDto)
+                .map(orderLineMapper::toOrderLineOutputDto)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(orderLineOutputDtos);
     }
@@ -40,53 +44,37 @@ public class OrderLineController {
     // Get an order line by ID
     @GetMapping(value = "/order-lines/{id}")
     public ResponseEntity<OrderLineOutputDto> getOrderLineById(@PathVariable Long id) {
-        Optional<OrderLine> orderLine = orderLineService.findOrderLineById(id);
-        return orderLine.map(value -> ResponseEntity.ok(OrderLineMapper.transferToOrderLineOutputDto(value)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        OrderLine orderLine = orderLineService.findOrderLineById(id);
+        return ResponseEntity.ok(orderLineMapper.toOrderLineOutputDto(orderLine));
     }
 
     // Create a new order line
     @PostMapping(value = "/order-lines")
-    public ResponseEntity<OrderLineOutputDto> createOrderLine(@RequestBody OrderLineInputDto orderLineInputDto) {
+    public ResponseEntity<OrderLineOutputDto> createOrderLine(@Valid @RequestBody OrderLineInputDto orderLineInputDto) {
         return beerService.getBeerById(orderLineInputDto.getBeerId())
                 .map(beer -> {
-                    OrderLine orderLine = OrderLineMapper.transferToOrderLineEntity(orderLineInputDto, beer);
-                    OrderLine savedOrderLine = orderLineService.saveOrderLine(orderLine);
-                    OrderLineOutputDto orderLineOutputDto = OrderLineMapper.transferToOrderLineOutputDto(savedOrderLine);
-                    return ResponseEntity.ok(orderLineOutputDto);
+                    OrderLine orderLine = OrderLineMapper.toOrderLineEntity(orderLineInputDto, beer);
+                    OrderLine savedOrderLine = orderLineService.addOrderLine(orderLine);
+                    return ResponseEntity.status(HttpStatus.CREATED)
+                            .body(orderLineMapper.toOrderLineOutputDto(savedOrderLine));
                 })
-                .orElse(ResponseEntity.badRequest().build());
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(null));
     }
 
     // Update an order line by ID
     @PutMapping(value = "/order-lines/{id}")
     public ResponseEntity<OrderLineOutputDto> updateOrderLine(
             @PathVariable Long id,
-            @RequestBody OrderLineInputDto orderLineInputDto) {
+            @Valid @RequestBody OrderLineInputDto orderLineInputDto) {
 
-        Optional<OrderLine> optionalOrderLine = orderLineService.findOrderLineById(id);
-
-        if (optionalOrderLine.isPresent()) {
-            OrderLine existingOrderLine = optionalOrderLine.get();
-
-            return beerService.getBeerById(orderLineInputDto.getBeerId())
-                    .map(beer -> {
-
-                        existingOrderLine.setBeer(beer);
-                        existingOrderLine.setAmount(orderLineInputDto.getQuantity());
-                        existingOrderLine.setPriceAtPurchase(orderLineInputDto.getPrice());
-
-                        OrderLine updatedOrderLine = orderLineService.saveOrderLine(existingOrderLine);
-
-                        OrderLineOutputDto orderLineOutputDto = OrderLineMapper.transferToOrderLineOutputDto(updatedOrderLine);
-
-                        return ResponseEntity.ok(orderLineOutputDto);
-                    })
-                    .orElse(ResponseEntity.badRequest().build()); // Beer ID not valid
-
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return beerService.getBeerById(orderLineInputDto.getBeerId())
+                .map(beer -> {
+                    OrderLine updatedOrderLine = OrderLineMapper.toOrderLineEntity(orderLineInputDto, beer);
+                    OrderLine savedOrderLine = orderLineService.updateOrderLine(id, updatedOrderLine);
+                    return ResponseEntity.ok(orderLineMapper.toOrderLineOutputDto(savedOrderLine));
+                })
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null));
     }
 
     // Delete an order line by ID

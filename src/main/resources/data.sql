@@ -1,3 +1,44 @@
+
+-- Insert users and authorities
+INSERT INTO users(username, password, email, enabled, apikey)
+VALUES
+    ('AdminJeroen', '$2a$12$Y1.YGAWx3mf.b2fWxwu59uWQN0VXisphbnxvbwW.xWUxf2QAsyAbW', 'jeroen.admin@test.nl', true, 'abc123'),
+    ('UserJohn', '$2a$12$rKDpV0oSDQXet7DOPDx5FuH88D07zMCHE.Qll6DpWx8y7Pysfu3xK', 'john@test.nl', true, 'def456'),
+    ('UserJane', '$2a$12$gFKypKqZ7swBrG9VL3eWqeYVysOVYt9hIkFk1VBF3DG.YuSN5Jybu', 'jane@test.nl', true, 'ghi789'),
+    ('UserEmily', '$2a$12$gFKypKqZ7swBrG9VL3eWqeYVysOVYt9hIkFk1VBF3DG.YuSN5Jybu', 'emily@test.nl', true, 'jkl012'),
+    ('UserMichael', '$2a$12$gFKypKqZ7swBrG9VL3eWqeYVysOVYt9hIkFk1VBF3DG.YuSN5Jybu', 'michael@test.nl', true, 'mno345'),
+    ('UserOlivia', '$2a$12$gFKypKqZ7swBrG9VL3eWqeYVysOVYt9hIkFk1VBF3DG.YuSN5Jybu', 'olivia@test.nl', true, 'pqr678');
+
+-- Insert authorities
+INSERT INTO authorities(username, authority)
+VALUES
+    ('AdminJeroen', 'ROLE_ADMIN'),
+    ('UserJohn', 'ROLE_USER'),
+    ('UserJane', 'ROLE_USER'),
+    ('UserEmily', 'ROLE_USER'),
+    ('UserMichael', 'ROLE_USER'),
+    ('UserOlivia', 'ROLE_USER');
+
+
+-- Insert customers
+INSERT INTO customers (firstname, surname, address, house_number, zipcode, city, phone, date_of_birth)
+VALUES
+    ('John', 'Doe', '123 Maple Street', '10A', '12345', 'Springfield', '555-1234', '1980-01-15'),
+    ('Jane', 'Smith', '456 Oak Avenue', '22B', '67890', 'Greenville',  '555-5678', '1985-02-20'),
+    ('Emily', 'Johnson', '789 Pine Road', '3C', '54321', 'Hilltown',   '555-9101', '1990-03-25'),
+    ('Michael', 'Brown', '101 Cedar Lane', '4D', '98765', 'Rivercity', '555-1122', '1975-04-30'),
+    ('Olivia', 'Davis', '202 Birch Boulevard', '5E', '87654', 'Lakeside', '555-1314', '1992-05-10');
+
+-- Insert orders for John, Emily, and Olivia with PaymentMethod
+INSERT INTO orders (id, customer_id, order_date, order_status, payment_method, delivery_address)
+VALUES
+    (1, 1, '2023-09-01', 'PENDING', 'CREDIT_CARD', '123 Maple Street, Springfield, 12345'), -- John Doe
+    (2, 1, '2023-09-05', 'DELIVERED', 'PAYPAL', '123 Maple Street, Springfield, 12345'), -- John Doe
+    (3, 3, '2023-09-03', 'PENDING', 'IDEAL', '789 Pine Road, Hilltown, 54321'), -- Emily Johnson
+    (4, 3, '2023-09-07', 'DELIVERED', 'CREDIT_CARD', '789 Pine Road, Hilltown, 54321'), -- Emily Johnson
+    (5, 5, '2023-09-02', 'DELIVERED', 'APPLE_PAY', '202 Birch Boulevard, Lakeside, 87654'), -- Olivia Davis
+    (6, 4, '2023-09-06', 'DELIVERED', 'BANK_TRANSFER', '101 Cedar Lane, Rivercity, 98765'); -- Michael Brow
+
 INSERT INTO taste (id, name)
 VALUES
     (1, 'Mango'),
@@ -13,6 +54,7 @@ VALUES
     (11, 'Honing'),
     (12, 'Peper');
 
+-- Insert categories for beers
 INSERT INTO category (id, beer_category_name, beer_category_type, beer_category_description)
 VALUES
     (1, 'Wheat Beer', 'Hefeweizen', 'Hefeweizen is a traditional wheat beer from Germany, known for its fruity and spicy flavor.'),
@@ -61,7 +103,7 @@ VALUES
     (44, 'Strong Ale', 'American Strong Ale', 'American Strong Ale is a bold, high-alcohol beer with strong malt and hop flavors.');
 
 
-
+-- Insert beers
 INSERT INTO beers (id, name, brand, description, color, brewery, country, abv, ibu, food, temperature, glassware, taste, price, image_url, beer_category)
 VALUES
     (1, 'Pilsner Urquell', 'Plzensky Prazdroj', 'A crisp, golden lager with a slightly sweet, malty flavor.', 'Golden', 'Pilsner Urquell Brewery', 'Czech Republic', 4.4, 40, 'Grilled Chicken, Cheese', '6-8°C', 'Pilsner Glass', 'Crisp, Malty, Bitter', 2.99, 'https://example.com/pilsner_urquell.jpg', 25),
@@ -80,18 +122,5 @@ VALUES
     (14, 'Stella Artois', 'Anheuser-Busch InBev', 'A crisp, slightly bitter Belgian lager.', 'Pale', 'Stella Artois Brewery', 'Belgium', 5.2, 25, 'Salads, Seafood', '3-5°C', 'Chalice', 'Crisp, Bitter, Refreshing', 2.79, 'https://example.com/stella_artois.jpg', 26),
     (15, 'Brooklyn Lager', 'Brooklyn Brewery', 'A hoppy amber lager with a floral aroma and a dry finish.', 'Amber', 'Brooklyn Brewery', 'USA', 5.2, 30, 'Pizza, Burgers', '6-8°C', 'Pint Glass', 'Hoppy, Floral, Dry', 4.29, 'https://example.com/brooklyn_lager.jpg', 17);
 
-INSERT INTO customers (firstname, surname, address, house_number, zipcode, city, phone, date_of_birth)
-VALUES
-    ('John', 'Doe', '123 Maple Street', '10A', '12345', 'Springfield',  '555-1234', '1980-01-15'),
-    ('Jane', 'Smith', '456 Oak Avenue', '22B', '67890', 'Greenville',  '555-5678', '1985-02-20'),
-    ('Emily', 'Johnson', '789 Pine Road', '3C', '54321', 'Hilltown',  '555-9101', '1990-03-25'),
-    ('Michael', 'Brown', '101 Cedar Lane', '4D', '98765', 'Rivercity', '555-1122', '1975-04-30'),
-    ('Olivia', 'Davis', '202 Birch Boulevard', '5E', '87654', 'Lakeside', '555-1314', '1992-05-10');
 
-INSERT INTO users(username, password, email, enabled, apikey)
-VALUES
-    ('AdminJeroen', '$2a$12$Y1.YGAWx3mf.b2fWxwu59uWQN0VXisphbnxvbwW.xWUxf2QAsyAbW', 'jeroen.admin@test.nl', true, 'abc123');
 
-INSERT INTO authorities(username, authority)
-VALUES
-    ('AdminJeroen', 'ROLE_ADMIN');

@@ -1,25 +1,27 @@
+// BeerController.java
 package com.backend.beer_api_application.controller;
 
 import com.backend.beer_api_application.dto.output.BeerOutputDto;
 import com.backend.beer_api_application.dto.input.BeerInputDto;
-
-import com.backend.beer_api_application.models.Beer;
+import com.backend.beer_api_application.exceptions.ResourceNotFoundException;
 import com.backend.beer_api_application.services.BeerService;
+import com.backend.beer_api_application.dto.mapper.BeerMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "api/v1")
 public class BeerController {
 
     private final BeerService beerService;
+    private final BeerMapper beerMapper;
 
-    public BeerController(BeerService beerService) {
+    public BeerController(BeerService beerService, BeerMapper beerMapper) {
         this.beerService = beerService;
+        this.beerMapper = beerMapper;
     }
 
     // Get all beers, with an optional brand filter
@@ -33,16 +35,18 @@ public class BeerController {
 
     // Get a beer by ID
     @GetMapping(value = "/beers/{id}")
-    public ResponseEntity<Optional<Beer>> getBeerById(@PathVariable Long id) {
-        Optional<Beer> beer = beerService.getBeerById(id);
-        return ResponseEntity.ok(beer);
+    public ResponseEntity<BeerOutputDto> getBeerById(@PathVariable Long id) {
+        BeerOutputDto beerDto = beerService.getBeerById(id)
+                .map(beerMapper::transferToBeerOutputDto)
+                .orElseThrow(() -> new ResourceNotFoundException("Beer with ID " + id + " not found"));
+        return ResponseEntity.ok(beerDto);
     }
 
     // Add a new beer
     @PostMapping(value = "/beers")
     public ResponseEntity<BeerOutputDto> addBeer(@RequestBody BeerInputDto beerInputDto) {
         BeerOutputDto dto = beerService.addBeer(beerInputDto);
-        URI location = URI.create(String.format("/api/v1/beers/%d", dto.getId()));  // Assuming BeerOutputDto has getId()
+        URI location = URI.create(String.format("/api/v1/beers/%d", dto.getId()));
         return ResponseEntity.created(location).body(dto);
     }
 
@@ -53,9 +57,12 @@ public class BeerController {
         return ResponseEntity.ok(dto);
     }
 
-    // Delete a beer by ID
+    // Delete a beer by ID with exception handling for not found beer
     @DeleteMapping(value = "/beers/{id}")
     public ResponseEntity<Void> deleteBeer(@PathVariable Long id) {
+        if (!beerService.getBeerById(id).isPresent()) {
+            throw new ResourceNotFoundException("Beer with ID " + id + " not found");
+        }
         beerService.deleteBeer(id);
         return ResponseEntity.noContent().build();
     }

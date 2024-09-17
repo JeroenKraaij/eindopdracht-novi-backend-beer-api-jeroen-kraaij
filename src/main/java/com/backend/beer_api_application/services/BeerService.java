@@ -14,31 +14,30 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.backend.beer_api_application.dto.mapper.BeerMapper.transferToBeerEntity;
-import static com.backend.beer_api_application.dto.mapper.BeerMapper.transferToBeerOutputDto;
-
 @Service
 public class BeerService {
 
     private final BeerRepository beerRepository;
     private final CategoryRepository categoryRepository;
+    private final BeerMapper beerMapper;
 
-    public BeerService(BeerRepository beerRepository, CategoryRepository categoryRepository) {
+    public BeerService(BeerRepository beerRepository, CategoryRepository categoryRepository, BeerMapper beerMapper) {
         this.beerRepository = beerRepository;
         this.categoryRepository = categoryRepository;
+        this.beerMapper = beerMapper;
     }
 
     @Transactional(readOnly = true)
     public List<BeerOutputDto> getAllBeers() {
         return beerRepository.findAll().stream()
-                .map(BeerMapper::transferToBeerOutputDto)
+                .map(beerMapper::transferToBeerOutputDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<BeerOutputDto> getAllBeersByBrand(String brand) {
         return beerRepository.findAllBeersByBrandEqualsIgnoreCase(brand).stream()
-                .map(BeerMapper::transferToBeerOutputDto)
+                .map(beerMapper::transferToBeerOutputDto)
                 .collect(Collectors.toList());
     }
 
@@ -49,9 +48,9 @@ public class BeerService {
 
     @Transactional
     public BeerOutputDto addBeer(BeerInputDto beerInputDto) {
-        Beer beer = transferToBeerEntity(beerInputDto);
+        Beer beer = beerMapper.transferToBeerEntity(beerInputDto);
         beerRepository.save(beer);
-        return transferToBeerOutputDto(beer);
+        return beerMapper.transferToBeerOutputDto(beer);
     }
 
     @Transactional
@@ -62,7 +61,7 @@ public class BeerService {
         updateBeerEntity(beer, beerInputDto);
         beerRepository.save(beer);
 
-        return transferToBeerOutputDto(beer);
+        return beerMapper.transferToBeerOutputDto(beer);
     }
 
     @Transactional
@@ -74,6 +73,5 @@ public class BeerService {
     }
 
     private void updateBeerEntity(Beer beer, BeerInputDto beerInputDto) {
-        // Logic to update Beer entity fields with values from BeerInputDto
     }
 }

@@ -1,6 +1,9 @@
 package com.backend.beer_api_application.models;
 
-import com.backend.beer_api_application.emum.OrderStatus;
+import com.backend.beer_api_application.enums.OrderStatus;
+import com.backend.beer_api_application.enums.PaymentMethod;
+import com.backend.beer_api_application.utils.AddressFormatter;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -43,45 +46,33 @@ public class Order {
     @Setter
     private String deliveryAddress;
 
+    // Use PaymentMethod Enum instead of String
+    @Enumerated(EnumType.STRING)
     @Setter
-    private String paymentMethod;
+    private PaymentMethod paymentMethod;
 
     // Calculated fields for total amounts
+    @Setter
     private BigDecimal totalAmountExcludingVat;
+    @Setter
     private BigDecimal totalAmountIncludingVat;
 
-
+    // Default constructor
     public Order() {
-        this.orderStatus = OrderStatus.PENDING;  // Default status
+        this.orderStatus = OrderStatus.PENDING;
         this.orderDate = LocalDateTime.now();    // Set current date as order date
     }
 
-    // Helper methods
-    public void addOrderLine(OrderLine orderLine) {
-        if (orderLine != null) {
-            orderLines.add(orderLine);
-            orderLine.setOrder(this);
+    // Set delivery address from customer details
+    public void setDeliveryAddress() {
+        if (this.customer != null) {
+            this.deliveryAddress = AddressFormatter.formatAddress(
+                    customer.getAddress(),
+                    customer.getHouseNumber(),
+                    customer.getZipcode(),
+                    customer.getCity()
+            );
         }
     }
 
-    public void removeOrderLine(OrderLine orderLine) {
-        if (orderLine != null) {
-            orderLines.remove(orderLine);
-            orderLine.setOrder(null);
-        }
-    }
-
-    // Helper method to calculate total amounts from OrderLines
-    public void calculateTotalAmounts() {
-        BigDecimal totalExclVat = BigDecimal.ZERO;
-        BigDecimal totalInclVat = BigDecimal.ZERO;
-
-        for (OrderLine orderLine : orderLines) {
-            totalExclVat = totalExclVat.add(orderLine.getPriceAtPurchase().multiply(BigDecimal.valueOf(orderLine.getAmount())));
-            totalInclVat = totalExclVat.add(orderLine.getPriceAtPurchase().multiply(BigDecimal.valueOf(orderLine.getAmount())).multiply(BigDecimal.valueOf(1.21)));
-        }
-
-        this.totalAmountExcludingVat = totalExclVat;
-        this.totalAmountIncludingVat = totalInclVat;
-    }
 }

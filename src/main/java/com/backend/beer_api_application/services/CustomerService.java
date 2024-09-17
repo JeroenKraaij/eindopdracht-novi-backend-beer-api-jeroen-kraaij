@@ -62,14 +62,6 @@ public class CustomerService {
         return CustomerMapper.transferToCustomerOutputDto(updatedCustomer);
     }
 
-    @Transactional
-    public void deleteCustomer(Long id) {
-        if (!customerRepository.existsById(id)) {
-            throw new RecordNotFoundException("Customer not found with ID: " + id);
-        }
-        customerRepository.deleteById(id);
-    }
-
     private void updateCustomerEntity(Customer customer, CustomerInputDto customerInputDto) {
         customer.setFirstname(customerInputDto.getFirstname());
         customer.setSurname(customerInputDto.getSurname());
@@ -79,5 +71,13 @@ public class CustomerService {
         customer.setCity(customerInputDto.getCity());
         customer.setPhone(customerInputDto.getPhone());
         customer.setDateOfBirth(customerInputDto.getDateOfBirth().toString());
+    }
+
+    @Transactional
+    public void deleteCustomer(Long id) {
+        if (!customerRepository.existsById(id)) {
+            throw new RecordNotFoundException("Customer not found with ID: " + id);
+        }
+        customerRepository.deleteById(id);
     }
 }
