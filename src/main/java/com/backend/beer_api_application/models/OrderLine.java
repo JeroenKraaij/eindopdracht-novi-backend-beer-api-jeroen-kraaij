@@ -3,13 +3,12 @@ package com.backend.beer_api_application.models;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 @Entity
 @Getter
-@Table(name = "orderlines")
+@Table (name = "order_line")
 public class OrderLine {
 
     @Id
@@ -18,20 +17,20 @@ public class OrderLine {
 
     // Many-to-one relationship with Beer
     @ManyToOne
-    @JoinColumn(name = "beer_id", nullable = false)
+    @JoinColumn(nullable = false)
     @Setter
     private Beer beer;
 
     // Many-to-one relationship with Order
     @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
+    @JoinColumn(nullable = false)
     @Setter
     private Order order;
 
     // Quantity of beers in the order
     @Column(nullable = false)
     @Setter
-    private Integer amount;
+    private Integer quantity;
 
     // Price at the time of purchase
     @Column(nullable = false, precision = 10, scale = 2)
@@ -41,11 +40,17 @@ public class OrderLine {
     // VAT constant (21%)
     private static final BigDecimal VAT_RATE = BigDecimal.valueOf(0.21);
 
-    // Constructor for initialization - priceAtPurchase is set to the current price of the beer
-    public OrderLine(Beer beer, Integer amount) {
+    // Constructor with stock validation
+    public OrderLine(Beer beer, Integer quantity) {
+        if (beer.getInStock() < quantity) {
+            throw new IllegalArgumentException("Out of Stock: Only " + beer.getInStock() + " beers available");
+        }
         this.beer = beer;
-        this.amount = amount;
-        this.priceAtPurchase = beer.getPrice(); // Get the current price from the Beer entity
+        this.quantity = quantity;
+        this.priceAtPurchase = beer.getPrice();
+
+        // Adjust the beer's stock (reduce inStock after order)
+        beer.decrementStock(quantity);
     }
 
     // Default constructor
@@ -53,7 +58,7 @@ public class OrderLine {
 
     // Calculate total price excluding VAT
     public BigDecimal getTotalPriceExcludingVat() {
-        return priceAtPurchase.multiply(BigDecimal.valueOf(amount))
+        return priceAtPurchase.multiply(BigDecimal.valueOf(quantity))
                 .setScale(2, RoundingMode.HALF_UP);
     }
 

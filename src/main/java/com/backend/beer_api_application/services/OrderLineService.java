@@ -46,7 +46,7 @@ public class OrderLineService {
 
         // Update the fields of the existing order line with the new values
         existingOrderLine.setBeer(updatedOrderLine.getBeer());
-        existingOrderLine.setAmount(updatedOrderLine.getAmount());
+        existingOrderLine.setQuantity(updatedOrderLine.getQuantity());
         existingOrderLine.setPriceAtPurchase(updatedOrderLine.getPriceAtPurchase());
 
         return orderLineRepository.save(existingOrderLine);  // Save the updated order line

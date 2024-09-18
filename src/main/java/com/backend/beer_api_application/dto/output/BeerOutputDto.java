@@ -24,6 +24,5 @@ public class BeerOutputDto {
     private String taste;
     private BigDecimal price;
     private String imageUrl;
+    private Integer inStock;
 }
-
-

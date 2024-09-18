@@ -9,23 +9,19 @@ import java.util.Set;
 
 @Entity
 @Getter
+@Setter
+@Table(name = "categories")
 public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Setter
     private String beerCategoryName;
-
-    @Setter
     private String beerCategoryType;
-
-    @Setter
     private String beerCategoryDescription;
 
     @OneToMany
-    @Setter
     private Set<Beer> beers = new HashSet<>();
 
     // Default constructor

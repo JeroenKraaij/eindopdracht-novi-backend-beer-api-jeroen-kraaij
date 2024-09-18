@@ -14,7 +14,7 @@ public class OrderCalculator {
         BigDecimal totalInclVat = BigDecimal.ZERO;
 
         for (OrderLine orderLine : order.getOrderLines()) {
-            BigDecimal lineTotalExclVat = orderLine.getPriceAtPurchase().multiply(BigDecimal.valueOf(orderLine.getAmount()));
+            BigDecimal lineTotalExclVat = orderLine.getPriceAtPurchase().multiply(BigDecimal.valueOf(orderLine.getQuantity()));
             totalExclVat = totalExclVat.add(lineTotalExclVat);
 
             BigDecimal lineTotalInclVat = lineTotalExclVat.multiply(BigDecimal.valueOf(1.21)); // Assuming 21% VAT

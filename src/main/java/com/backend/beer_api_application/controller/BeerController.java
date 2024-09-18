@@ -1,4 +1,3 @@
-// BeerController.java
 package com.backend.beer_api_application.controller;
 
 import com.backend.beer_api_application.dto.output.BeerOutputDto;
@@ -6,6 +5,7 @@ import com.backend.beer_api_application.dto.input.BeerInputDto;
 import com.backend.beer_api_application.exceptions.ResourceNotFoundException;
 import com.backend.beer_api_application.services.BeerService;
 import com.backend.beer_api_application.dto.mapper.BeerMapper;
+import lombok.SneakyThrows;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +24,7 @@ public class BeerController {
         this.beerMapper = beerMapper;
     }
 
-    // Get all beers, with an optional brand filter
+    // Get all beers
     @GetMapping(value = "/beers")
     public ResponseEntity<List<BeerOutputDto>> getAllBeers(@RequestParam(value = "brand", required = false) String brand) {
         List<BeerOutputDto> dtos = (brand == null || brand.isEmpty())
@@ -43,6 +43,7 @@ public class BeerController {
     }
 
     // Add a new beer
+    @SneakyThrows
     @PostMapping(value = "/beers")
     public ResponseEntity<BeerOutputDto> addBeer(@RequestBody BeerInputDto beerInputDto) {
         BeerOutputDto dto = beerService.addBeer(beerInputDto);
@@ -51,19 +52,27 @@ public class BeerController {
     }
 
     // Update an existing beer by ID
+    @SneakyThrows
     @PutMapping(value = "/beers/{id}")
     public ResponseEntity<BeerOutputDto> updateBeer(@PathVariable Long id, @RequestBody BeerInputDto newBeer) {
         BeerOutputDto dto = beerService.updateBeer(id, newBeer);
         return ResponseEntity.ok(dto);
     }
 
-    // Delete a beer by ID with exception handling for not found beer
+    // Delete a beer by ID
     @DeleteMapping(value = "/beers/{id}")
     public ResponseEntity<Void> deleteBeer(@PathVariable Long id) {
-        if (!beerService.getBeerById(id).isPresent()) {
+        if (beerService.getBeerById(id).isEmpty()) {
             throw new ResourceNotFoundException("Beer with ID " + id + " not found");
         }
         beerService.deleteBeer(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Add the inStock for a specific beer by ID
+    @GetMapping(value = "/beers/{id}/stock")
+    public ResponseEntity<Integer> getBeerStock(@PathVariable Long id) {
+        Integer stock = beerService.getBeerStock(id);
+        return ResponseEntity.ok(stock);
     }
 }

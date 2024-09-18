@@ -2,6 +2,7 @@ package com.backend.beer_api_application.dto.input;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 
@@ -56,6 +57,10 @@ public class BeerInputDto {
     @Positive(message = "Price must be positive")
     private BigDecimal price;
 
-    @Size(max = 255, message = "Image URL can be at most 255 characters")
-    private String imageUrl;
+    @NotNull(message = "Image is mandatory")
+    private MultipartFile imageFile;
+
+    @NotNull(message = "Stock is mandatory")
+    @PositiveOrZero(message = "Stock must be zero or positive")
+    private Integer inStock;
 }
