@@ -14,7 +14,7 @@ public class OrderLineMapper {
         OrderLineOutputDto dto = new OrderLineOutputDto();
         dto.setId(orderLine.getId());
         dto.setBeerName(orderLine.getBeer().getName());
-        dto.setAmount(orderLine.getAmount());
+        dto.setAmount(orderLine.getQuantity());
         dto.setPriceAtPurchase(orderLine.getPriceAtPurchase());
         dto.setTotalPriceExcludingVat(orderLine.getTotalPriceExcludingVat());
         dto.setTotalPriceIncludingVat(orderLine.getTotalPriceIncludingVat());
@@ -26,7 +26,7 @@ public class OrderLineMapper {
     public static OrderLine toOrderLineEntity(OrderLineInputDto dto, Beer beer) {
         OrderLine orderLine = new OrderLine();
         orderLine.setBeer(beer);
-        orderLine.setAmount(dto.getQuantity());
+        orderLine.setQuantity(dto.getQuantity());
         orderLine.setPriceAtPurchase(orderLine.getTotalPriceIncludingVat());
 
         return orderLine;

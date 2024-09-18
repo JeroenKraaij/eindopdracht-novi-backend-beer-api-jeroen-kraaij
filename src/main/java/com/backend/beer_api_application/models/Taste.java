@@ -9,18 +9,16 @@ import java.util.List;
 
 @Entity
 @Getter
-
+@Setter
 public class Taste {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Setter
     @Column(nullable = false, unique = true)
     private String name;
 
-    @Setter
     @ManyToMany(mappedBy = "tastes")
     private List<Beer> beers = new ArrayList<>();
 

@@ -3,6 +3,7 @@ package com.backend.beer_api_application.controller;
 import com.backend.beer_api_application.dto.input.OrderLineInputDto;
 import com.backend.beer_api_application.dto.mapper.OrderLineMapper;
 import com.backend.beer_api_application.dto.output.OrderLineOutputDto;
+import com.backend.beer_api_application.exceptions.OutOfStockException;
 import com.backend.beer_api_application.models.OrderLine;
 import com.backend.beer_api_application.services.BeerService;
 import com.backend.beer_api_application.services.OrderLineService;
@@ -48,33 +49,46 @@ public class OrderLineController {
         return ResponseEntity.ok(orderLineMapper.toOrderLineOutputDto(orderLine));
     }
 
-    // Create a new order line
+    // Create a new order line with stock validation
     @PostMapping(value = "/order-lines")
-    public ResponseEntity<OrderLineOutputDto> createOrderLine(@Valid @RequestBody OrderLineInputDto orderLineInputDto) {
+    public ResponseEntity<?> createOrderLine(@Valid @RequestBody OrderLineInputDto orderLineInputDto) {
         return beerService.getBeerById(orderLineInputDto.getBeerId())
                 .map(beer -> {
-                    OrderLine orderLine = OrderLineMapper.toOrderLineEntity(orderLineInputDto, beer);
-                    OrderLine savedOrderLine = orderLineService.addOrderLine(orderLine);
-                    return ResponseEntity.status(HttpStatus.CREATED)
-                            .body(orderLineMapper.toOrderLineOutputDto(savedOrderLine));
+                    try {
+                        // Create order line after validating stock
+                        OrderLine orderLine = new OrderLine(beer, orderLineInputDto.getQuantity());
+                        OrderLine savedOrderLine = orderLineService.addOrderLine(orderLine);
+                        return ResponseEntity.status(HttpStatus.CREATED)
+                                .body(orderLineMapper.toOrderLineOutputDto(savedOrderLine));
+                    } catch (IllegalArgumentException | OutOfStockException ex) {
+                        // Return a 400 Bad Request if stock is insufficient
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+                    }
                 })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(null));
+                        .body("Beer with ID " + orderLineInputDto.getBeerId() + " not found"));
     }
 
-    // Update an order line by ID
+    // Update an order line with stock validation
     @PutMapping(value = "/order-lines/{id}")
-    public ResponseEntity<OrderLineOutputDto> updateOrderLine(
+    public ResponseEntity<?> updateOrderLine(
             @PathVariable Long id,
             @Valid @RequestBody OrderLineInputDto orderLineInputDto) {
 
         return beerService.getBeerById(orderLineInputDto.getBeerId())
                 .map(beer -> {
-                    OrderLine updatedOrderLine = OrderLineMapper.toOrderLineEntity(orderLineInputDto, beer);
-                    OrderLine savedOrderLine = orderLineService.updateOrderLine(id, updatedOrderLine);
-                    return ResponseEntity.ok(orderLineMapper.toOrderLineOutputDto(savedOrderLine));
+                    try {
+                        // Update order line after validating stock
+                        OrderLine updatedOrderLine = new OrderLine(beer, orderLineInputDto.getQuantity());
+                        OrderLine savedOrderLine = orderLineService.updateOrderLine(id, updatedOrderLine);
+                        return ResponseEntity.ok(orderLineMapper.toOrderLineOutputDto(savedOrderLine));
+                    } catch (IllegalArgumentException | OutOfStockException ex) {
+                        // Return a 400 Bad Request if stock is insufficient
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+                    }
                 })
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null));
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Beer with ID " + orderLineInputDto.getBeerId() + " not found"));
     }
 
     // Delete an order line by ID

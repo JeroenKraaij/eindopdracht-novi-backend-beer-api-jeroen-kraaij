@@ -19,25 +19,14 @@ VALUES
     ('UserMichael', 'ROLE_USER'),
     ('UserOlivia', 'ROLE_USER');
 
-
 -- Insert customers
-INSERT INTO customers (firstname, surname, address, house_number, zipcode, city, phone, date_of_birth)
+INSERT INTO customers (firstname, surname, address, house_number, zipcode, city, phone, date_of_birth, user_customer)
 VALUES
-    ('John', 'Doe', '123 Maple Street', '10A', '12345', 'Springfield', '555-1234', '1980-01-15'),
-    ('Jane', 'Smith', '456 Oak Avenue', '22B', '67890', 'Greenville',  '555-5678', '1985-02-20'),
-    ('Emily', 'Johnson', '789 Pine Road', '3C', '54321', 'Hilltown',   '555-9101', '1990-03-25'),
-    ('Michael', 'Brown', '101 Cedar Lane', '4D', '98765', 'Rivercity', '555-1122', '1975-04-30'),
-    ('Olivia', 'Davis', '202 Birch Boulevard', '5E', '87654', 'Lakeside', '555-1314', '1992-05-10');
-
--- Insert orders for John, Emily, and Olivia with PaymentMethod
-INSERT INTO orders (id, customer_id, order_date, order_status, payment_method, delivery_address)
-VALUES
-    (1, 1, '2023-09-01', 'PENDING', 'CREDIT_CARD', '123 Maple Street, Springfield, 12345'), -- John Doe
-    (2, 1, '2023-09-05', 'DELIVERED', 'PAYPAL', '123 Maple Street, Springfield, 12345'), -- John Doe
-    (3, 3, '2023-09-03', 'PENDING', 'IDEAL', '789 Pine Road, Hilltown, 54321'), -- Emily Johnson
-    (4, 3, '2023-09-07', 'DELIVERED', 'CREDIT_CARD', '789 Pine Road, Hilltown, 54321'), -- Emily Johnson
-    (5, 5, '2023-09-02', 'DELIVERED', 'APPLE_PAY', '202 Birch Boulevard, Lakeside, 87654'), -- Olivia Davis
-    (6, 4, '2023-09-06', 'DELIVERED', 'BANK_TRANSFER', '101 Cedar Lane, Rivercity, 98765'); -- Michael Brow
+    ('John', 'Doe', '123 Maple Street', '10A', '12345', 'Springfield', '555-1234', '1980-01-15', 'UserJohn'),
+    ('Jane', 'Smith', '456 Oak Avenue', '5B', '67890', 'Hilltown', '555-5678', '1985-05-20', 'UserJane'),
+    ('Emily', 'Johnson', '789 Pine Road', '3C', '24680', 'Lakeside', '555-9012', '1990-10-25', 'UserEmily'),
+    ('Michael', 'Williams', '101 Elm Drive', '7D', '13579', 'Riverside', '555-3456', '1975-03-30', 'UserMichael'),
+    ('Olivia', 'Brown', '202 Birch Boulevard', '2E', '97531', 'Meadowview', '555-7890', '1988-08-10', 'UserOlivia');
 
 INSERT INTO taste (id, name)
 VALUES
@@ -55,7 +44,7 @@ VALUES
     (12, 'Peper');
 
 -- Insert categories for beers
-INSERT INTO category (id, beer_category_name, beer_category_type, beer_category_description)
+INSERT INTO categories (id, beer_category_name, beer_category_type, beer_category_description)
 VALUES
     (1, 'Wheat Beer', 'Hefeweizen', 'Hefeweizen is a traditional wheat beer from Germany, known for its fruity and spicy flavor.'),
     (2, 'Wheat Beer', 'Witbier', 'Witbier is a Belgian style wheat beer, often brewed with coriander and orange peel.'),
@@ -102,25 +91,51 @@ VALUES
     (43, 'Strong Ale', 'Old Ale', 'Old Ale is a strong, malty beer, often aged to develop complex flavors.'),
     (44, 'Strong Ale', 'American Strong Ale', 'American Strong Ale is a bold, high-alcohol beer with strong malt and hop flavors.');
 
-
 -- Insert beers
-INSERT INTO beers (id, name, brand, description, color, brewery, country, abv, ibu, food, temperature, glassware, taste, price, image_url, beer_category)
+INSERT INTO beers (id, name, brand, description, color, brewery, country, abv, ibu, food, temperature, glassware, taste, price, in_stock, category_id)
 VALUES
-    (1, 'Pilsner Urquell', 'Plzensky Prazdroj', 'A crisp, golden lager with a slightly sweet, malty flavor.', 'Golden', 'Pilsner Urquell Brewery', 'Czech Republic', 4.4, 40, 'Grilled Chicken, Cheese', '6-8°C', 'Pilsner Glass', 'Crisp, Malty, Bitter', 2.99, 'https://example.com/pilsner_urquell.jpg', 25),
-    (2, 'Guinness Draught', 'Guinness', 'Rich and creamy with coffee and chocolate notes.', 'Dark', 'Guinness Brewery', 'Ireland', 4.2, 45, 'Stew, Shellfish', '6-8°C', 'Stout Glass', 'Creamy, Roasted, Bitter', 3.99, 'https://example.com/guinness_draught.jpg', 20),
-    (3, 'Sierra Nevada Pale Ale', 'Sierra Nevada', 'A classic American Pale Ale with a bold hop flavor.', 'Amber', 'Sierra Nevada Brewing Co.', 'USA', 5.6, 38, 'Burgers, Spicy Food', '8-10°C', 'Pint Glass', 'Hoppy, Citrus, Pine', 4.49, 'https://example.com/sierra_nevada_pale_ale.jpg', 11),
-    (4, 'Budweiser', 'Anheuser-Busch', 'A smooth and crisp lager with a clean finish.', 'Golden', 'Anheuser-Busch', 'USA', 5.0, 12, 'Pizza, Salad', '4-6°C', 'Pilsner Glass', 'Smooth, Light, Crisp', 1.99, 'https://example.com/budweiser.jpg', 26),
-    (5, 'Chimay Blue', 'Chimay', 'A strong, dark Belgian ale with rich fruit flavors.', 'Dark', 'Bières de Chimay', 'Belgium', 9.0, 35, 'Cheese, Stew', '10-12°C', 'Trappist Glass', 'Rich, Fruity, Malty', 5.99, 'https://example.com/chimay_blue.jpg', 8),
-    (6, 'Hoegaarden', 'Hoegaarden Brewery', 'A refreshing Belgian witbier with hints of orange peel and coriander.', 'Pale', 'Hoegaarden Brewery', 'Belgium', 4.9, 15, 'Seafood, Salad', '4-6°C', 'Witbier Glass', 'Citrusy, Spicy, Refreshing', 3.49, 'https://example.com/hoegaarden.jpg', 2),
-    (7, 'Heineken', 'Heineken', 'A well-known Dutch lager with a slightly bitter taste.', 'Pale', 'Heineken Brewery', 'Netherlands', 5.0, 19, 'Salads, Seafood', '5-7°C', 'Lager Glass', 'Light, Crisp, Bitter', 2.49, 'https://example.com/heineken.jpg', 26),
-    (8, 'Samuel Adams Boston Lager', 'Boston Beer Company', 'A full-bodied amber lager with a rich, malty flavor.', 'Amber', 'Boston Beer Company', 'USA', 5.0, 30, 'Burgers, Chicken', '6-8°C', 'Pint Glass', 'Malty, Hoppy, Balanced', 4.49, 'https://example.com/samuel_adams_boston_lager.jpg', 10),
-    (9, 'Duvel', 'Duvel Moortgat', 'A strong, golden Belgian ale with a fruity aroma and dry finish.', 'Golden', 'Duvel Moortgat', 'Belgium', 8.5, 32, 'Fish, Spicy Food', '6-8°C', 'Tulip Glass', 'Fruity, Dry, Strong', 6.99, 'https://example.com/duvel.jpg', 7),
-    (10, 'Rochefort 10', 'Rochefort Brewery', 'A dark, strong Belgian ale with complex flavors of dark fruit and caramel.', 'Dark Brown', 'Rochefort Brewery', 'Belgium', 11.3, 27, 'Cheese, Desserts', '12-14°C', 'Trappist Glass', 'Rich, Fruity, Sweet', 7.99, 'https://example.com/rochefort_10.jpg', 9),
-    (11, 'Newcastle Brown Ale', 'Heineken', 'A smooth, malty brown ale with a hint of caramel.', 'Brown', 'Newcastle Brewery', 'England', 4.7, 18, 'Grilled Meats, Cheese', '8-10°C', 'Pint Glass', 'Malty, Caramel, Smooth', 3.29, 'https://example.com/newcastle_brown_ale.jpg', 18),
-    (12, 'Leffe Blonde', 'Abbaye de Leffe', 'A Belgian blonde ale with a slightly sweet and fruity flavor.', 'Golden', 'Abbaye de Leffe', 'Belgium', 6.6, 20, 'Fish, Poultry', '6-8°C', 'Goblet', 'Sweet, Fruity, Light', 4.99, 'https://example.com/leffe_blonde.jpg', 10),
-    (13, 'Anchor Steam Beer', 'Anchor Brewing Company', 'A unique American beer with a rich, malty flavor and a hint of fruitiness.', 'Amber', 'Anchor Brewing Company', 'USA', 4.9, 35, 'Burgers, BBQ', '8-10°C', 'Pint Glass', 'Malty, Fruity, Balanced', 3.99, 'https://example.com/anchor_steam.jpg', 35),
-    (14, 'Stella Artois', 'Anheuser-Busch InBev', 'A crisp, slightly bitter Belgian lager.', 'Pale', 'Stella Artois Brewery', 'Belgium', 5.2, 25, 'Salads, Seafood', '3-5°C', 'Chalice', 'Crisp, Bitter, Refreshing', 2.79, 'https://example.com/stella_artois.jpg', 26),
-    (15, 'Brooklyn Lager', 'Brooklyn Brewery', 'A hoppy amber lager with a floral aroma and a dry finish.', 'Amber', 'Brooklyn Brewery', 'USA', 5.2, 30, 'Pizza, Burgers', '6-8°C', 'Pint Glass', 'Hoppy, Floral, Dry', 4.29, 'https://example.com/brooklyn_lager.jpg', 17);
+    (1, 'Pilsner Urquell', 'Plzensky Prazdroj', 'A crisp, golden lager with a slightly sweet, malty flavor.', 'Golden', 'Pilsner Urquell Brewery', 'Czech Republic', 4.4, 40, 'Grilled Chicken, Cheese', '6-8°C', 'Pilsner Glass', 'Crisp, Malty, Bitter', 2.99, 100, 25),
+    (2, 'Guinness Draught', 'Guinness', 'Rich and creamy with coffee and chocolate notes.', 'Dark', 'Guinness Brewery', 'Ireland', 4.2, 45, 'Stew, Shellfish', '6-8°C', 'Stout Glass', 'Creamy, Roasted, Bitter', 3.99, 50, 20),
+    (3, 'Sierra Nevada Pale Ale', 'Sierra Nevada', 'A classic American Pale Ale with a bold hop flavor.', 'Amber', 'Sierra Nevada Brewing Co.', 'USA', 5.6, 38, 'Burgers, Spicy Food', '8-10°C', 'Pint Glass', 'Hoppy, Citrus, Pine', 4.49, 75, 11),
+    (4, 'Budweiser', 'Anheuser-Busch', 'A smooth and crisp lager with a clean finish.', 'Golden', 'Anheuser-Busch', 'USA', 5.0, 12, 'Pizza, Salad', '4-6°C', 'Pilsner Glass', 'Smooth, Light, Crisp', 1.99, 200, 26),
+    (5, 'Chimay Blue', 'Chimay', 'A strong, dark Belgian ale with rich fruit flavors.', 'Dark', 'Bières de Chimay', 'Belgium', 9.0, 35, 'Cheese, Stew', '10-12°C', 'Trappist Glass', 'Rich, Fruity, Malty', 5.99, 30, 8),
+    (6, 'Hoegaarden', 'Hoegaarden Brewery', 'A refreshing Belgian witbier with hints of orange peel and coriander.', 'Pale', 'Hoegaarden Brewery', 'Belgium', 4.9, 15, 'Seafood, Salad', '4-6°C', 'Witbier Glass', 'Citrusy, Spicy, Refreshing', 3.49, 150, 2),
+    (7, 'Heineken', 'Heineken', 'A well-known Dutch lager with a slightly bitter taste.', 'Pale', 'Heineken Brewery', 'Netherlands', 5.0, 19, 'Salads, Seafood', '5-7°C', 'Lager Glass', 'Light, Crisp, Bitter', 2.49, 180, 26),
+    (8, 'Samuel Adams Boston Lager', 'Boston Beer Company', 'A full-bodied amber lager with a rich, malty flavor.', 'Amber', 'Boston Beer Company', 'USA', 5.0, 30, 'Burgers, Chicken', '6-8°C', 'Pint Glass', 'Malty, Hoppy, Balanced', 4.49, 60, 10),
+    (9, 'Duvel', 'Duvel Moortgat', 'A strong, golden Belgian ale with a fruity aroma and dry finish.', 'Golden', 'Duvel Moortgat', 'Belgium', 8.5, 32, 'Fish, Spicy Food', '6-8°C', 'Tulip Glass', 'Fruity, Dry, Strong', 6.99, 45, 7),
+    (10, 'Rochefort 10', 'Rochefort Brewery', 'A dark, strong Belgian ale with complex flavors of dark fruit and caramel.', 'Dark Brown', 'Rochefort Brewery', 'Belgium', 11.3, 27, 'Cheese, Desserts', '12-14°C', 'Trappist Glass', 'Rich, Fruity, Sweet', 7.99, 25, 9),
+    (11, 'Newcastle Brown Ale', 'Heineken', 'A smooth, malty brown ale with a hint of caramel.', 'Brown', 'Newcastle Brewery', 'England', 4.7, 18, 'Grilled Meats, Cheese', '8-10°C', 'Pint Glass', 'Malty, Caramel, Smooth', 3.29, 80, 18),
+    (12, 'Leffe Blonde', 'Abbaye de Leffe', 'A Belgian blonde ale with a slightly sweet and fruity flavor.', 'Golden', 'Abbaye de Leffe', 'Belgium', 6.6, 20, 'Fish, Poultry', '6-8°C', 'Goblet', 'Sweet, Fruity, Light', 4.99, 70, 10),
+    (13, 'Anchor Steam Beer', 'Anchor Brewing Company', 'A unique American beer with a rich, malty flavor and a hint of fruitiness.', 'Amber', 'Anchor Brewing Company', 'USA', 4.9, 35, 'Burgers, BBQ', '8-10°C', 'Pint Glass', 'Malty, Fruity, Balanced', 3.99, 100, 35),
+    (14, 'Stella Artois', 'Anheuser-Busch InBev', 'A crisp, slightly bitter Belgian lager.', 'Pale', 'Stella Artois Brewery', 'Belgium', 5.2, 25, 'Salads, Seafood', '3-5°C', 'Chalice', 'Crisp, Bitter, Refreshing', 2.79, 200, 26),
+    (15, 'Brooklyn Lager', 'Brooklyn Brewery', 'A hoppy amber lager with a floral aroma and a dry finish.', 'Amber', 'Brooklyn Brewery', 'USA', 5.2, 30, 'Pizza, Burgers', '6-8°C', 'Pint Glass', 'Hoppy, Floral, Dry', 4.29, 90, 17);
 
+-- Insert orders
+INSERT INTO "orders" (customer_id, order_date, order_status, payment_method, delivery_address)
+VALUES
+    (1, '2023-01-01', 'PENDING', 'CREDIT_CARD', '123 Maple Street, Springfield'),
+    (2, '2023-01-02', 'PROCESSING', 'PAYPAL', '789 Pine Road, Hilltown'),
+    (3, '2023-01-03', 'SHIPPED', 'CREDIT_CARD', '202 Birch Boulevard, Lakeside');
 
+-- Insert order lines
+INSERT INTO order_line (beer_id, order_id, quantity, price_at_purchase)
+VALUES
+    (1, 1, 2, 2.99), -- 2 Pilsner Urquell for John
+    (2, 1, 1, 3.99), -- 1 Guinness Draught for John
+    (3, 2, 3, 4.49), -- 3 Sierra Nevada Pale Ale for John
+    (4, 2, 1, 1.99), -- 1 Budweiser for John
+    (5, 3, 2, 5.99), -- 2 Chimay Blue for Emily
+    (6, 3, 1, 3.49); -- 1 Hoegaarden for Emily
 
+-- Update the orders table with calculated total amounts
+UPDATE orders o
+SET total_amount_excluding_vat = (
+    SELECT SUM(ol.price_at_purchase * ol.quantity)
+    FROM order_line ol
+    WHERE ol.order_id = o.id
+),
+    total_amount_including_vat = (
+        SELECT SUM(ol.price_at_purchase * ol.quantity * 1.21) -- Assuming VAT rate is 21%
+        FROM order_line ol
+        WHERE ol.order_id = o.id
+    );

@@ -15,6 +15,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "orders")
 public class Order {
 
@@ -22,48 +23,28 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Many-to-one relationship with Customer
     @ManyToOne
-    @JoinColumn(name = "customer_id", nullable = false)
-    @Setter
+    @JoinColumn( nullable = false)
     private Customer customer;
 
-    // One-to-many relationship with OrderLine
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderLine> orderLines = new ArrayList<>();
 
-    // Enum for order status
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @Setter
-    private OrderStatus orderStatus;
+    private OrderStatus orderStatus = OrderStatus.PENDING;
 
-    // Order date
     @Column(nullable = false)
-    private LocalDateTime orderDate;
+    private LocalDateTime orderDate = LocalDateTime.now();
 
-    // Delivery address and payment method
-    @Setter
     private String deliveryAddress;
 
-    // Use PaymentMethod Enum instead of String
     @Enumerated(EnumType.STRING)
-    @Setter
     private PaymentMethod paymentMethod;
 
-    // Calculated fields for total amounts
-    @Setter
     private BigDecimal totalAmountExcludingVat;
-    @Setter
     private BigDecimal totalAmountIncludingVat;
 
-    // Default constructor
-    public Order() {
-        this.orderStatus = OrderStatus.PENDING;
-        this.orderDate = LocalDateTime.now();    // Set current date as order date
-    }
-
-    // Set delivery address from customer details
     public void setDeliveryAddress() {
         if (this.customer != null) {
             this.deliveryAddress = AddressFormatter.formatAddress(
@@ -74,5 +55,4 @@ public class Order {
             );
         }
     }
-
 }
