@@ -12,5 +12,4 @@ public class CategoryOutputDto {
     private String beerCategoryName;
     private String beerCategoryType;
     private String beerCategoryDescription;
-    private List<BeerOutputDto> beerOutputDtoList = new ArrayList<>();
 }

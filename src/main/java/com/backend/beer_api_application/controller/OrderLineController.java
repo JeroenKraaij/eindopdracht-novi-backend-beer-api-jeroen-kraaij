@@ -37,7 +37,7 @@ public class OrderLineController {
     public ResponseEntity<List<OrderLineOutputDto>> getAllOrderLines() {
         List<OrderLine> orderLines = orderLineService.findAllOrderLines();
         List<OrderLineOutputDto> orderLineOutputDtos = orderLines.stream()
-                .map(orderLineMapper::toOrderLineOutputDto)
+                .map(orderLineMapper::transferToOrderLineOutputDto)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(orderLineOutputDtos);
     }
@@ -46,7 +46,7 @@ public class OrderLineController {
     @GetMapping(value = "/order-lines/{id}")
     public ResponseEntity<OrderLineOutputDto> getOrderLineById(@PathVariable Long id) {
         OrderLine orderLine = orderLineService.findOrderLineById(id);
-        return ResponseEntity.ok(orderLineMapper.toOrderLineOutputDto(orderLine));
+        return ResponseEntity.ok(orderLineMapper.transferToOrderLineOutputDto(orderLine));
     }
 
     // Create a new order line with stock validation
@@ -59,7 +59,7 @@ public class OrderLineController {
                         OrderLine orderLine = new OrderLine(beer, orderLineInputDto.getQuantity());
                         OrderLine savedOrderLine = orderLineService.addOrderLine(orderLine);
                         return ResponseEntity.status(HttpStatus.CREATED)
-                                .body(orderLineMapper.toOrderLineOutputDto(savedOrderLine));
+                                .body(orderLineMapper.transferToOrderLineOutputDto(savedOrderLine));
                     } catch (IllegalArgumentException | OutOfStockException ex) {
                         // Return a 400 Bad Request if stock is insufficient
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
@@ -81,7 +81,7 @@ public class OrderLineController {
                         // Update order line after validating stock
                         OrderLine updatedOrderLine = new OrderLine(beer, orderLineInputDto.getQuantity());
                         OrderLine savedOrderLine = orderLineService.updateOrderLine(id, updatedOrderLine);
-                        return ResponseEntity.ok(orderLineMapper.toOrderLineOutputDto(savedOrderLine));
+                        return ResponseEntity.ok(orderLineMapper.transferToOrderLineOutputDto(savedOrderLine));
                     } catch (IllegalArgumentException | OutOfStockException ex) {
                         // Return a 400 Bad Request if stock is insufficient
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());

@@ -22,11 +22,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "api/v1")
+@RequestMapping("api/v1")
 public class OrderController {
 
     private final OrderService orderService;
-    private final CustomerService customerService;
     private final CustomerRepository customerRepository;
     private final OrderMapper orderMapper;
 
@@ -34,60 +33,68 @@ public class OrderController {
     public OrderController(OrderService orderService, CustomerService customerService,
                            CustomerRepository customerRepository, OrderMapper orderMapper) {
         this.orderService = orderService;
-        this.customerService = customerService;
         this.customerRepository = customerRepository;
         this.orderMapper = orderMapper;
     }
 
-    // Get all orders
-    @GetMapping(value = "/orders")
+    @GetMapping("/orders")
     public ResponseEntity<List<OrderOutputDto>> getAllOrders() {
         List<Order> orders = orderService.findAllOrders();
         List<OrderOutputDto> orderOutputDtos = orders.stream()
-                .map(orderMapper::toOrderOutputDto)
+                .map(orderMapper::TransferToOrderOutputDto)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(orderOutputDtos);
     }
 
-    // Get an order by ID
-    @GetMapping(value = "/orders/{id}")
+    @GetMapping("/orders/{id}")
     public ResponseEntity<OrderOutputDto> getOrderById(@PathVariable Long id) {
         Order order = orderService.findOrderById(id);
-        return ResponseEntity.ok(orderMapper.toOrderOutputDto(order));
+        return ResponseEntity.ok(orderMapper.TransferToOrderOutputDto(order));
     }
 
-    // Create a new order
-    @PostMapping(value = "/orders")
+    @PostMapping("/orders")
     public ResponseEntity<OrderOutputDto> createOrder(@Valid @RequestBody OrderInputDto orderInputDto) {
-        // Retrieve customer by ID
         Customer customer = customerRepository.findById(orderInputDto.getCustomerId())
                 .orElseThrow(() -> new RecordNotFoundException("Customer not found with ID: " + orderInputDto.getCustomerId()));
-
-        // Convert input DTO to entity and process order
-        List<OrderLine> orderLines = orderMapper.toOrderLineList(orderInputDto.getOrderLines());
+        List<OrderLine> orderLines = orderMapper.transferToOrderLineList(orderInputDto.getOrderLines());
         Order newOrder = orderService.addNewOrder(customer, orderLines);
-
-        // Return created order
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(orderMapper.toOrderOutputDto(newOrder));
+                .body(orderMapper.TransferToOrderOutputDto(newOrder));
     }
 
-    // Update the status of an order
-    @PatchMapping(value = "/orders/{id}/status")
+    @PatchMapping("/orders/{id}/status")
     public ResponseEntity<OrderOutputDto> updateOrderStatus(@PathVariable Long id, @RequestBody OrderStatus newStatus) {
         try {
             Order updatedOrder = orderService.updateOrderStatus(id, newStatus);
-            return ResponseEntity.ok(orderMapper.toOrderOutputDto(updatedOrder));
+            return ResponseEntity.ok(orderMapper.TransferToOrderOutputDto(updatedOrder));
         } catch (OrderNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
-    // Delete an order by ID
-    @DeleteMapping(value = "/orders/{id}")
+    @DeleteMapping("/orders/{id}")
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
-        Order order = orderService.findOrderById(id);
         orderService.deleteOrderById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/orders/{orderId}/order-lines")
+    public ResponseEntity<OrderOutputDto> addOrderLineToOrder(@PathVariable Long orderId, @Valid @RequestBody OrderLine orderLine) {
+        try {
+            Order updatedOrder = orderService.addOrderLineToOrder(orderId, orderLine);
+            return ResponseEntity.ok(orderMapper.TransferToOrderOutputDto(updatedOrder));
+        } catch (OrderNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @DeleteMapping("/orders/{orderId}/order-lines/{orderLineId}")
+    public ResponseEntity<OrderOutputDto> removeOrderLineFromOrder(@PathVariable Long orderId, @PathVariable Long orderLineId) {
+        try {
+            Order updatedOrder = orderService.removeOrderLineFromOrder(orderId, orderLineId);
+            return ResponseEntity.ok(orderMapper.TransferToOrderOutputDto(updatedOrder));
+        } catch (OrderNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 }

@@ -16,13 +16,13 @@ public class BeerOutputDto {
     private String color;
     private String brewery;
     private String country;
-    private String abv;
+    private Float abv;
     private Integer ibu;
     private String food;
     private String temperature;
     private String glassware;
     private String taste;
     private BigDecimal price;
-    private String imageUrl;
+    private String image;
     private Integer inStock;
 }

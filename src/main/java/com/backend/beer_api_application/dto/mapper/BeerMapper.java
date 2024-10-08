@@ -25,11 +25,23 @@ public class BeerMapper {
         dto.setBrand(beer.getBrand());
         dto.setPrice(beer.getPrice());
         dto.setInStock(beer.getInStock());
+        if (beer.getCategory() != null) {
+            dto.setCategory(beer.getCategory().getBeerCategoryName());
+            dto.setBeerCategoryType(beer.getCategory().getBeerCategoryType());
+        }
+        dto.setDescription(beer.getDescription());
+        dto.setColor(beer.getColor());
+        dto.setBrewery(beer.getBrewery());
+        dto.setCountry(beer.getCountry());
+        dto.setAbv(beer.getAbv());
+        dto.setIbu(beer.getIbu());
+        dto.setFood(beer.getFood());
+        dto.setTemperature(beer.getTemperature());
+        dto.setGlassware(beer.getGlassware());
+        dto.setTaste(beer.getTaste());
 
-        // Optionally, map image data if required in the output
         if (!beer.getImageUploads().isEmpty()) {
-            // Assuming you want to return image details like fileName or URL
-            dto.setImageUrl(beer.getImageUploads().get(0).getFileName());
+            dto.setImage(beer.getImageUploads().get(0).getFileName());
         }
 
         return dto;
@@ -44,8 +56,6 @@ public class BeerMapper {
         Category category = categoryRepository.findById(beerInputDto.getCategory())
                 .orElseThrow(() -> new RecordNotFoundException("Category not found with ID " + beerInputDto.getCategory()));
         beer.setCategory(category);
-
-        // Map other fields from BeerInputDto to Beer entity
         beer.setDescription(beerInputDto.getDescription());
         beer.setColor(beerInputDto.getColor());
         beer.setBrewery(beerInputDto.getBrewery());
@@ -59,7 +69,6 @@ public class BeerMapper {
         beer.setPrice(beerInputDto.getPrice());
         beer.setInStock(beerInputDto.getInStock());
 
-        // Image handling is done separately in BeerService
         return beer;
     }
 }

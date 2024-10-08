@@ -24,4 +24,11 @@ public class OrderCalculator {
         order.setTotalAmountExcludingVat(totalExclVat);
         order.setTotalAmountIncludingVat(totalInclVat);
     }
+
+    public static BigDecimal getVatAmount(Order order) {
+        if (order.getTotalAmountIncludingVat() != null && order.getTotalAmountExcludingVat() != null) {
+            return order.getTotalAmountIncludingVat().subtract(order.getTotalAmountExcludingVat());
+        }
+        return BigDecimal.ZERO;
+    }
 }

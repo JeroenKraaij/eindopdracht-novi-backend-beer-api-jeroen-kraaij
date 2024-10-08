@@ -12,9 +12,10 @@ public class CustomerOutputDto {
     private String houseNumber;
     private String zipcode;
     private String city;
-    private String email;
     private String phone;
     private String dateOfBirth;
+    private String email;
+
 }
 
 

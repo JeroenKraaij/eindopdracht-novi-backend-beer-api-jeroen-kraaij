@@ -7,6 +7,7 @@ import com.backend.beer_api_application.models.Customer;
 import com.backend.beer_api_application.models.Order;
 import com.backend.beer_api_application.models.OrderLine;
 import com.backend.beer_api_application.repositories.BeerRepository;
+import com.backend.beer_api_application.utils.OrderCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +27,7 @@ public class OrderMapper {
     }
 
     // Map Order entity to OrderOutputDto
-    public OrderOutputDto toOrderOutputDto(Order order) {
+    public OrderOutputDto TransferToOrderOutputDto(Order order) {
         OrderOutputDto dto = new OrderOutputDto();
         dto.setId(order.getId());
         setCustomerDetails(order, dto);
@@ -37,6 +38,7 @@ public class OrderMapper {
     // Set customer-related fields
     private void setCustomerDetails(Order order, OrderOutputDto dto) {
         Customer customer = order.getCustomer();
+        dto.setCustomerId(customer.getId());
         dto.setCustomerName(customer.getFirstname() + " " + customer.getSurname());
         dto.setCustomerAddress(customer.getAddress());
         dto.setCustomerHouseNumber(customer.getHouseNumber());
@@ -51,27 +53,26 @@ public class OrderMapper {
         dto.setOrderStatus(order.getOrderStatus().name());
         dto.setTotalAmountExcludingVat(order.getTotalAmountExcludingVat());
         dto.setTotalAmountIncludingVat(order.getTotalAmountIncludingVat());
-
-        // Here, we use the injected OrderLineMapper to convert order lines
+        dto.setVatAmount(OrderCalculator.getVatAmount(order));
         dto.setOrderLines(order.getOrderLines().stream()
-                .map(orderLineMapper::toOrderLineOutputDto)  // Call the instance method
+                .map(orderLineMapper::transferToOrderLineOutputDto)
                 .collect(Collectors.toList()));
         dto.setDeliveryAddress(order.getDeliveryAddress());
         dto.setPaymentMethod(String.valueOf(order.getPaymentMethod()));
     }
 
     // Convert List of OrderLineInputDto to List of OrderLine entities
-    public List<OrderLine> toOrderLineList(List<OrderLineInputDto> dtos) {
+    public List<OrderLine> transferToOrderLineList(List<OrderLineInputDto> dtos) {
         return dtos.stream()
-                .map(this::toOrderLine)
+                .map(this::transferToOrderLine)
                 .collect(Collectors.toList());
     }
 
     // Convert OrderLineInputDto to OrderLine entity
-    public OrderLine toOrderLine(OrderLineInputDto dto) {
+    public OrderLine transferToOrderLine(OrderLineInputDto dto) {
         Beer beer = beerRepository.findById(dto.getBeerId())
                 .orElseThrow(() -> new RuntimeException("Beer with ID " + dto.getBeerId() + " not found"));
 
-        return OrderLineMapper.toOrderLineEntity(dto, beer);  // Call the correct method here
+        return OrderLineMapper.transferToOrderLineEntity(dto, beer);  // Call the correct method here
     }
 }

@@ -19,21 +19,9 @@ public class Beer {
     private Long id;
 
     @Column(nullable = false)
-    private String name;
+    private String name, brand, description, color, brewery, temperature, glassware, taste;
 
-    @Column(nullable = false)
-    private String brand;
-
-    @Column(length = 1000, nullable = false)
-    private String description;
-
-    @Column(nullable = false)
-    private String color;
-
-    @Column(nullable = false)
-    private String brewery;
-
-    private String country;
+    private String country, food;
 
     @Column(nullable = false)
     private Float abv;
@@ -41,22 +29,11 @@ public class Beer {
     @Column(nullable = false)
     private Integer ibu;
 
-    private String food;
-
-    @Column(nullable = false)
-    private String temperature;
-
-    @Column(nullable = false)
-    private String glassware;
-
-    @Column(nullable = false)
-    private String taste;
-
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
     @ManyToOne
-    @JoinColumn( nullable = false)
+    @JoinColumn(nullable = false)
     private Category category;
 
     @ManyToMany

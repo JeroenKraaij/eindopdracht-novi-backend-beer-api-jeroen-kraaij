@@ -9,18 +9,19 @@ import org.springframework.stereotype.Service;
 public class UserMapper {
 
     // Convert User entity to UserOutputDto
-    public static UserOutputDto toDto(User user) {
+    public static UserOutputDto transferToUserOutputDto(User user) {
         UserOutputDto dto = new UserOutputDto();
         dto.setUsername(user.getUsername());
         dto.setEnabled(user.isEnabled());
         dto.setApikey(user.getApikey());
         dto.setEmail(user.getEmail());
+        dto.setUsername(user.getUsername());
         dto.setAuthorities(user.getAuthorities());
         return dto;
     }
 
     // Convert UserOutputDto to User entity
-    public static User toEntity(UserInputDto dto) {
+    public static User transferToUserEntity(UserInputDto dto) {
         User user = new User();
         user.setUsername(dto.getUserName());
         user.setEmail(dto.getEmail());

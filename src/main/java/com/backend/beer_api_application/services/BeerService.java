@@ -48,7 +48,7 @@ public class BeerService {
     }
 
     // Get a beer by ID
-    @Transactional(readOnly = true)
+    @Transactional()
     public Optional<Beer> getBeerById(Long id) {
         return beerRepository.findById(id);
     }

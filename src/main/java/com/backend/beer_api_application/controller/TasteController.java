@@ -34,7 +34,7 @@ public class TasteController {
     }
 
     // POST - Add a new taste
-    @PostMapping
+    @PostMapping("/tastes")
     public ResponseEntity<TasteOutputDto> addTaste(@RequestBody TasteInputDto tasteInputDto) {
         TasteOutputDto createdTaste = tasteService.addTaste(tasteInputDto);
         return new ResponseEntity<>(createdTaste, HttpStatus.CREATED);

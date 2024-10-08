@@ -4,6 +4,7 @@ import com.backend.beer_api_application.dto.input.CustomerInputDto;
 import com.backend.beer_api_application.dto.output.CustomerOutputDto;
 import com.backend.beer_api_application.dto.mapper.CustomerMapper;
 import com.backend.beer_api_application.exceptions.RecordNotFoundException;
+import com.backend.beer_api_application.exceptions.UserAlreadyExistsException;
 import com.backend.beer_api_application.models.Customer;
 import com.backend.beer_api_application.models.User;
 import com.backend.beer_api_application.repositories.CustomerRepository;
@@ -45,6 +46,10 @@ public class CustomerService {
     public CustomerOutputDto addCustomer(CustomerInputDto customerInputDto, Authentication userDetails) {
 
         Optional<User> user = userRepository.findUserByUsername(userDetails.getName());
+        if (user.get().getCustomer()!=null){
+            throw new UserAlreadyExistsException("Customer already exists with ID: " + user.get().getCustomer().getId());
+
+        }
         Customer customer = CustomerMapper.transferToCustomerEntity(customerInputDto);
         customer.setUser(user.get());
         Customer savedCustomer = customerRepository.save(customer);

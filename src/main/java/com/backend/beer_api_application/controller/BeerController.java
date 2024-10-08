@@ -5,6 +5,7 @@ import com.backend.beer_api_application.dto.input.BeerInputDto;
 import com.backend.beer_api_application.exceptions.ResourceNotFoundException;
 import com.backend.beer_api_application.services.BeerService;
 import com.backend.beer_api_application.dto.mapper.BeerMapper;
+import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +36,7 @@ public class BeerController {
 
     // Get a beer by ID
     @GetMapping(value = "/beers/{id}")
+    @Transactional
     public ResponseEntity<BeerOutputDto> getBeerById(@PathVariable Long id) {
         BeerOutputDto beerDto = beerService.getBeerById(id)
                 .map(beerMapper::transferToBeerOutputDto)
@@ -70,7 +72,7 @@ public class BeerController {
     }
 
     // Add the inStock for a specific beer by ID
-    @GetMapping(value = "/beers/{id}/stock")
+    @GetMapping(value = "/beers/{id}/in-stock")
     public ResponseEntity<Integer> getBeerStock(@PathVariable Long id) {
         Integer stock = beerService.getBeerStock(id);
         return ResponseEntity.ok(stock);

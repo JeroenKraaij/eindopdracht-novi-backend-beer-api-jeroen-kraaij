@@ -5,7 +5,6 @@ import com.backend.beer_api_application.dto.mapper.UserMapper;
 import com.backend.beer_api_application.dto.output.UserOutputDto;
 import com.backend.beer_api_application.exceptions.RecordNotFoundException;
 import com.backend.beer_api_application.models.Authority;
-import com.backend.beer_api_application.models.Customer;
 import com.backend.beer_api_application.models.User;
 import com.backend.beer_api_application.repositories.CustomerRepository;
 import com.backend.beer_api_application.repositories.UserRepository;
@@ -35,14 +34,14 @@ public class UserService {
     public List<UserOutputDto> getUsers() {
         return userRepository.findAll()
                 .stream()
-                .map(UserMapper::toDto)
+                .map(UserMapper::transferToUserOutputDto)
                 .collect(Collectors.toList());
     }
 
     // Fetch a user by username and convert to DTO
     public UserOutputDto getUser(String username) {
         User user = findUserByUsername(username); // Reuse method to find user
-        return UserMapper.toDto(user);
+        return UserMapper.transferToUserOutputDto(user);
     }
 
     // Fetch a user entity by username (used for security purposes)
@@ -59,7 +58,7 @@ public class UserService {
     // Create a new user
     public String createUser(UserInputDto userInputDto) {
         String randomString = RandomStringGenerator.generateAlphaNumeric(20);
-        User newUser = UserMapper.toEntity(userInputDto);
+        User newUser = UserMapper.transferToUserEntity(userInputDto);
         newUser.setApikey(randomString);
         newUser.setPassword(passwordEncoder.encode(userInputDto.getPassword()));  // Handle password encryption
         userRepository.save(newUser);

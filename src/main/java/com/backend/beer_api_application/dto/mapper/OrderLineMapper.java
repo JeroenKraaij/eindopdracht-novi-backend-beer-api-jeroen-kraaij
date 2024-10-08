@@ -10,24 +10,25 @@ import org.springframework.stereotype.Service;
 public class OrderLineMapper {
 
     // Convert OrderLine entity to OrderLineOutputDto
-    public OrderLineOutputDto toOrderLineOutputDto(OrderLine orderLine) {
+    public OrderLineOutputDto transferToOrderLineOutputDto(OrderLine orderLine) {
         OrderLineOutputDto dto = new OrderLineOutputDto();
         dto.setId(orderLine.getId());
+        dto.setBeerId(orderLine.getBeer().getId());
         dto.setBeerName(orderLine.getBeer().getName());
+        dto.setBeerType(orderLine.getBeer().getBeerCategoryType());
         dto.setAmount(orderLine.getQuantity());
         dto.setPriceAtPurchase(orderLine.getPriceAtPurchase());
         dto.setTotalPriceExcludingVat(orderLine.getTotalPriceExcludingVat());
         dto.setTotalPriceIncludingVat(orderLine.getTotalPriceIncludingVat());
-
+        dto.setVatAmount(orderLine.getTotalPriceIncludingVat().subtract(orderLine.getTotalPriceExcludingVat()));
         return dto;
     }
 
     // Convert OrderLineInputDto to OrderLine entity
-    public static OrderLine toOrderLineEntity(OrderLineInputDto dto, Beer beer) {
+    public static OrderLine transferToOrderLineEntity(OrderLineInputDto dto, Beer beer) {
         OrderLine orderLine = new OrderLine();
         orderLine.setBeer(beer);
         orderLine.setQuantity(dto.getQuantity());
-        orderLine.setPriceAtPurchase(orderLine.getTotalPriceIncludingVat());
 
         return orderLine;
     }
