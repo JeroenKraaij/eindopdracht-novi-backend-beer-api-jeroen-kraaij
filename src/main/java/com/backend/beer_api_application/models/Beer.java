@@ -1,16 +1,14 @@
 package com.backend.beer_api_application.models;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Getter
-@Setter
+@Data
 @Table(name = "beers")
 public class Beer {
 
@@ -18,7 +16,7 @@ public class Beer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column
     private String name, brand, description, color, brewery, temperature, glassware, taste;
 
     private String country, food;
@@ -26,7 +24,7 @@ public class Beer {
     @Column(nullable = false)
     private Float abv;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Integer ibu;
 
     @Column(nullable = false, precision = 10, scale = 2)

@@ -21,7 +21,7 @@ public class ImageUpload {
     private String fileName;
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = true)
     private byte[] imageData;
 
     @Column(nullable = false)
@@ -53,7 +53,7 @@ public class ImageUpload {
     private String fileExtension;
 
     @ManyToOne
-    @JoinColumn( nullable = false)
+    @JoinColumn
     private Beer beer;
 
     public ImageUpload() {}

@@ -5,6 +5,7 @@ import com.backend.beer_api_application.enums.PaymentMethod;
 import com.backend.beer_api_application.utils.AddressFormatter;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,8 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Getter
-@Setter
+@Data
 @Table(name = "orders")
 public class Order {
 

@@ -1,13 +1,14 @@
 package com.backend.beer_api_application.models;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 @Entity
-@Getter
+@Data
 @Table (name = "order_line")
 public class OrderLine {
 
@@ -18,23 +19,19 @@ public class OrderLine {
     // Many-to-one relationship with Beer
     @ManyToOne
     @JoinColumn(nullable = false)
-    @Setter
     private Beer beer;
 
     // Many-to-one relationship with Order
     @ManyToOne
     @JoinColumn(nullable = false)
-    @Setter
     private Order order;
 
     // Quantity of beers in the order
     @Column(nullable = false)
-    @Setter
     private Integer quantity;
 
     // Price at the time of purchase
     @Column(nullable = false, precision = 10, scale = 2)
-    @Setter
     private BigDecimal priceAtPurchase;
 
     // VAT constant (21%)
