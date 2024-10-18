@@ -34,7 +34,7 @@ public class CustomerController {
         return ResponseEntity.ok(customer);
     }
 
-    // Create a Customer
+    // Add a Customer
     @PostMapping(value = "/customers")
     public ResponseEntity<CustomerOutputDto> createCustomer(@Valid @RequestBody CustomerInputDto request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

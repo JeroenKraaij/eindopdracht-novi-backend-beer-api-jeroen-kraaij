@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ActiveProfiles("test")
 class OrderServiceTest {
 
     @Mock
@@ -39,6 +37,31 @@ class OrderServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
+    // Test findAllOrders
+    @Test
+    void findAllOrders_shouldReturnListOfOrders() {
+        List<Order> mockOrders = new ArrayList<>();
+        mockOrders.add(new Order());
+        when(orderRepository.findAll()).thenReturn(mockOrders);
+
+        List<Order> orders = orderService.findAllOrders();
+
+        assertNotNull(orders);
+        assertEquals(1, orders.size());
+        verify(orderRepository, times(1)).findAll();
+    }
+
+    @Test
+    void findAllOrders_shouldReturnEmptyListWhenNoOrders() {
+        when(orderRepository.findAll()).thenReturn(new ArrayList<>());
+
+        List<Order> orders = orderService.findAllOrders();
+
+        assertTrue(orders.isEmpty());
+        verify(orderRepository, times(1)).findAll();
+    }
+
+    // Test findOrderById
     @Test
     void findOrderById_shouldReturnOrder_whenOrderExists() {
         Order mockOrder = new Order();
@@ -58,6 +81,7 @@ class OrderServiceTest {
         assertThrows(OrderNotFoundException.class, () -> orderService.findOrderById(1L));
     }
 
+    // Test addNewOrder
     @Test
     void addNewOrder_shouldCreateAndSaveOrder() {
         Customer customer = new Customer();
@@ -78,6 +102,7 @@ class OrderServiceTest {
         verify(orderServiceHelper, times(1)).addOrderLinesToOrder(any(Order.class), eq(orderLines));
     }
 
+    // Test updateOrderStatus
     @Test
     void updateOrderStatus_shouldUpdateAndSaveOrder() {
         Order existingOrder = new Order();
@@ -95,6 +120,7 @@ class OrderServiceTest {
         verify(orderRepository, times(1)).save(existingOrder);
     }
 
+    // Test deleteOrderById
     @Test
     void deleteOrderById_shouldDeleteOrder_whenOrderExists() {
         when(orderRepository.existsById(1L)).thenReturn(true);
@@ -112,6 +138,7 @@ class OrderServiceTest {
         verify(orderRepository, never()).deleteById(anyLong());
     }
 
+    // Test addOrderLineToOrder
     @Test
     void addOrderLineToOrder_shouldAddOrderLineAndSaveOrder() {
         Order existingOrder = new Order();
@@ -125,6 +152,20 @@ class OrderServiceTest {
 
         assertNotNull(updatedOrder);
         verify(orderServiceHelper, times(1)).addOrderLine(existingOrder, newOrderLine);
+        verify(orderRepository, times(1)).save(existingOrder);
+    }
+
+    // Test removeOrderLineFromOrder
+    @Test
+    void removeOrderLineFromOrder_shouldRemoveOrderLineAndSaveOrder() {
+        Order existingOrder = new Order();
+        existingOrder.setId(1L);
+
+        when(orderServiceHelper.getOrderById(1L)).thenReturn(existingOrder);
+
+        orderService.removeOrderLineFromOrder(1L, 1L);
+
+        verify(orderServiceHelper, times(1)).removeOrderLine(existingOrder, 1L);
         verify(orderRepository, times(1)).save(existingOrder);
     }
 }

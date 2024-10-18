@@ -23,18 +23,21 @@ public class UserController {
         this.userService = userService;
     }
 
+    // Get all users
     @GetMapping(value = "/users")
     public ResponseEntity<List<UserOutputDto>> getAllUsers() {
         List<UserOutputDto> userOutputDtos = userService.getUsers();
         return ResponseEntity.ok().body(userOutputDtos);
     }
 
+    // Get a user by username
     @GetMapping(value = "/users/{username}")
     public ResponseEntity<UserOutputDto> getUserByName(@PathVariable("username") String username) {
         UserOutputDto userDto = userService.getUser(username);
         return ResponseEntity.ok().body(userDto);
     }
 
+    // Add a new user
     @PostMapping(value = "/users")
     public ResponseEntity<UserOutputDto> createUser(@RequestBody UserInputDto userInputDto) {
         try {
@@ -51,6 +54,7 @@ public class UserController {
         }
     }
 
+    // Update an existing user by username
     @PutMapping(value = "/users/{username}")
     public ResponseEntity<UserOutputDto> updateUser(@PathVariable("username") String username, @RequestBody Map<String, Object> request) {
         try {
@@ -70,17 +74,20 @@ public class UserController {
         }
     }
 
+    // Delete a user by username
     @DeleteMapping(value = "/users/{username}")
     public ResponseEntity<Object> deleteUser(@PathVariable("username") String username) {
         userService.deleteUser(username);
         return ResponseEntity.noContent().build();
     }
 
+
     @GetMapping(value = "/users/{username}/authorities")
     public ResponseEntity<Object> getUserAuthorities(@PathVariable("username") String username) {
         return ResponseEntity.ok().body(userService.getAuthorities(username));
     }
 
+    // Add an authority to a user
     @PostMapping(value = "/users/{username}/authorities")
     public ResponseEntity<Object> addUserAuthority(@PathVariable("username") String username, @RequestBody Map<String, Object> fields) {
         try {
@@ -92,6 +99,7 @@ public class UserController {
         }
     }
 
+    //
     @DeleteMapping(value = "/users/{username}/authorities/{authority}")
     public ResponseEntity<Object> deleteUserAuthority(@PathVariable("username") String username, @PathVariable("authority") String authority) {
         userService.removeAuthority(username, authority);

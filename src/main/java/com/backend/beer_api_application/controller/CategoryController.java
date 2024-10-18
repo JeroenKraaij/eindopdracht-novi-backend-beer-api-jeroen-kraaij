@@ -21,18 +21,21 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
+    // Get all categories
     @GetMapping(value = "/categories")
     public ResponseEntity<List<CategoryOutputDto>> getAllCategories() {
         List<CategoryOutputDto> categories = categoryService.getAllCategories();
         return ResponseEntity.ok(categories);
     }
 
+    // Get all categories by name
     @GetMapping(value = "/categories/{id}")
     public ResponseEntity<CategoryOutputDto> getCategoryById(@PathVariable Long id) {
         CategoryOutputDto categoryOutputDto = categoryService.getCategoryById(id);
         return ResponseEntity.ok(categoryOutputDto);
     }
 
+    // Add a new category
     @PostMapping(value = "/categories")
     public ResponseEntity<CategoryOutputDto> createCategory(@Valid @RequestBody CategoryInputDto categoryInputDto) {
         CategoryOutputDto categoryOutputDto = categoryService.addCategory(categoryInputDto);
@@ -45,12 +48,14 @@ public class CategoryController {
         return ResponseEntity.created(uri).body(categoryOutputDto);
     }
 
+    // Update an existing category by ID
     @PutMapping(value = "/categories/{id}")
     public ResponseEntity<CategoryOutputDto> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryInputDto categoryInputDto) {
         CategoryOutputDto updatedCategory = categoryService.updateCategory(id, categoryInputDto);
         return ResponseEntity.ok(updatedCategory);
     }
 
+    // Delete a category by ID
     @DeleteMapping(value = "/categories/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);

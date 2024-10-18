@@ -17,20 +17,20 @@ public class ImageUpload {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column
     private String fileName;
 
     @Lob
-    @Column(nullable = true)
+    @Column
     private byte[] imageData;
 
-    @Column(nullable = false)
+    @Column
     private Long size;
 
-    @Column(nullable = false)
+    @Column
     private String contentType;
 
-    @Column(nullable = false)
+    @Column
     private LocalDateTime uploadDate = LocalDateTime.now();
 
     @Column(length = 255)
@@ -42,14 +42,14 @@ public class ImageUpload {
     @Column(unique = true)
     private String hash;
 
-    @Column(nullable = false)
+    @Column
     private Boolean isFeatured = false;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column
     private ImageStatus status = ImageStatus.ACTIVE;
 
-    @Column(nullable = false)
+    @Column
     private String fileExtension;
 
     @ManyToOne

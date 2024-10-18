@@ -16,6 +16,7 @@ public class ImageUploadController {
     @Autowired
     private ImageUploadService imageUploadService;
 
+    // Upload an image
     @PostMapping("/images/upload/{beerId}")
     public ResponseEntity<ImageUpload> uploadImage(@PathVariable Long beerId, @RequestParam("file") MultipartFile file
     ) {

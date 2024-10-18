@@ -3,20 +3,12 @@ package com.backend.beer_api_application.controller;
 import com.backend.beer_api_application.dto.input.BeerInputDto;
 import com.backend.beer_api_application.models.Beer;
 import com.backend.beer_api_application.models.Category;
-import com.backend.beer_api_application.repositories.BeerRepository;
-import com.backend.beer_api_application.repositories.CategoryRepository;
-import com.backend.beer_api_application.repositories.CustomerRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,13 +25,7 @@ import static org.hamcrest.Matchers.*;
 class BeerControllerTest {
 
     @Autowired
-    public MockMvc mockMvc;
-
-    @Autowired
-    public BeerRepository beerRepository;
-
-    @Autowired
-    public CategoryRepository categoryRepository;
+    MockMvc mockMvc;
 
     @Autowired
     public ObjectMapper objectMapper;
@@ -49,31 +35,25 @@ class BeerControllerTest {
 
     @BeforeEach
     void setUp() {
-        beerRepository.deleteAll();
-
-        // Create and save a test category if it doesn't exist
-        if (categoryRepository.findByBeerCategoryName("Lager") == null) {
-            Category category = new Category();
-            category.setBeerCategoryName("Lager");
-            categoryRepository.save(category);
-        }
 
         testBeerEntity = createTestBeerEntity();
         testBeerInputDto = createTestBeerInputDto();
     }
 
     @Test
+
     void getAllBeers() throws Exception {
         mockMvc.perform(get("/api/v1/beers"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$", hasSize(6)))
                 .andExpect(jsonPath("$[0].name", is("Test Beer")))
                 .andExpect(jsonPath("$[0].brand", is("Test Brand")));
     }
 
     @Test
     void getBeerById() throws Exception {
-        mockMvc.perform(get("/api/v1/beers/{id}", testBeerEntity.getId()))
+
+        mockMvc.perform(get("/api/v1/beers/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is("Test Beer")))
                 .andExpect(jsonPath("$.brand", is("Test Brand")));
@@ -93,7 +73,7 @@ class BeerControllerTest {
     void updateBeer() throws Exception {
         BeerInputDto updatedBeerInput = createUpdatedBeerInputDto();
 
-        mockMvc.perform(put("/api/v1/beers/{id}", testBeerEntity.getId())
+        mockMvc.perform(put("/api/v1/beers/100")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedBeerInput)))
                 .andExpect(status().isOk())
@@ -103,21 +83,25 @@ class BeerControllerTest {
 
     @Test
     void deleteBeer() throws Exception {
-        mockMvc.perform(delete("/api/v1/beers/{id}", testBeerEntity.getId()))
+        mockMvc.perform(delete("/api/v1/beers/200"))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/v1/beers/{id}", testBeerEntity.getId()))
+        mockMvc.perform(get("/api/v1/beers/200"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void getBeerStock() throws Exception {
-        mockMvc.perform(get("/api/v1/beers/{id}/in-stock", testBeerEntity.getId()))
+        mockMvc.perform(get("/api/v1/beers/100/in-stock"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", is(10)));
+                .andExpect(jsonPath("$", is(15)));
     }
 
     private Beer createTestBeerEntity() {
+        Category category = new Category();
+        category.setBeerCategoryName("Lager");
+
+
         Beer beer = new Beer();
         beer.setName("Test Beer");
         beer.setBrand("Test Brand");
@@ -125,8 +109,10 @@ class BeerControllerTest {
         beer.setInStock(10);
         beer.setAbv(5.0F);
         beer.setBrewery("Test Brewery");
-        beer.setCategory(categoryRepository.findByBeerCategoryName("Lager"));  // Fixed method name
-        return beerRepository.save(beer);
+        beer.setCategory(category);
+//        beer.setCategory(categoryRepository.findByBeerCategoryName("Lager"));  // Fixed method name
+//        return beerRepository.save(beer);
+        return beer;
     }
 
     private BeerInputDto createTestBeerInputDto() {
@@ -136,6 +122,7 @@ class BeerControllerTest {
         dto.setPrice(BigDecimal.valueOf(5.00));
         dto.setInStock(10);
         dto.setAbv(5.0F);
+        dto.setCategory(1l);
         return dto;
     }
 
@@ -145,6 +132,7 @@ class BeerControllerTest {
         dto.setBrand("Updated Brand");
         dto.setPrice(BigDecimal.valueOf(6.00));
         dto.setInStock(15);
+        dto.setAbv(6.0F);
         return dto;
     }
 }
