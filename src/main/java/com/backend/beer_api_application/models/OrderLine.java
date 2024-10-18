@@ -3,13 +3,13 @@ package com.backend.beer_api_application.models;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
-import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 @Entity
 @Data
-@Table (name = "order_line")
+@Table(name = "order_line")
 public class OrderLine {
 
     @Id
@@ -23,7 +23,7 @@ public class OrderLine {
 
     // Many-to-one relationship with Order
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn()
     private Order order;
 
     // Quantity of beers in the order
@@ -31,6 +31,7 @@ public class OrderLine {
     private Integer quantity;
 
     // Price at the time of purchase
+    @Getter
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal priceAtPurchase;
 
@@ -44,7 +45,9 @@ public class OrderLine {
         }
         this.beer = beer;
         this.quantity = quantity;
-        this.priceAtPurchase = beer.getPrice();
+
+        // Set priceAtPurchase with a default fallback
+        setPriceAtPurchase(priceAtPurchase != null ? priceAtPurchase : beer.getPrice());
 
         // Adjust the beer's stock (reduce inStock after order)
         beer.decrementStock(quantity);
@@ -65,5 +68,13 @@ public class OrderLine {
         return totalPriceExcludingVat
                 .add(totalPriceExcludingVat.multiply(VAT_RATE))
                 .setScale(2, RoundingMode.HALF_UP);
+    }
+
+    // Setter for priceAtPurchase with null check
+    public void setPriceAtPurchase(BigDecimal priceAtPurchase) {
+        if (priceAtPurchase == null) {
+            throw new IllegalArgumentException("priceAtPurchase cannot be null");
+        }
+        this.priceAtPurchase = priceAtPurchase;
     }
 }

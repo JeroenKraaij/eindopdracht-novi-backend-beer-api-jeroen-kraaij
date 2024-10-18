@@ -29,6 +29,7 @@ public class OrderLineMapper {
         OrderLine orderLine = new OrderLine();
         orderLine.setBeer(beer);
         orderLine.setQuantity(dto.getQuantity());
+        orderLine.setPriceAtPurchase(beer.getPrice());
 
         return orderLine;
     }
