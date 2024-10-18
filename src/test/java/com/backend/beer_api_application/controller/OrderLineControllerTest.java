@@ -79,7 +79,7 @@ class OrderLineControllerTest {
         mockOrderLineInputDto.setQuantity(15); // Requesting 15 units, stock is 10
         Beer mockBeer = new Beer();
         mockBeer.setId(1L);
-        mockBeer.setInStock(10); // 10 units available in stock
+        mockBeer.setInStock(16); // 10 units available in stock
 
         // Mock service behavior
         when(beerService.getBeerById(1L)).thenReturn(Optional.of(mockBeer)); // Beer found

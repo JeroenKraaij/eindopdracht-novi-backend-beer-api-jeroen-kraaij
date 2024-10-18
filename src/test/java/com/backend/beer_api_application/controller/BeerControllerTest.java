@@ -1,67 +1,138 @@
 package com.backend.beer_api_application.controller;
 
-import com.backend.beer_api_application.dto.mapper.BeerMapper;
-import com.backend.beer_api_application.dto.output.BeerOutputDto;
-import com.backend.beer_api_application.exceptions.ResourceNotFoundException;
-import com.backend.beer_api_application.services.BeerService;
+import com.backend.beer_api_application.dto.input.BeerInputDto;
+import com.backend.beer_api_application.models.Beer;
+import com.backend.beer_api_application.models.Category;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import java.math.BigDecimal;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.hamcrest.Matchers.*;
+
+@SpringBootTest
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 class BeerControllerTest {
 
-    @Mock
-    private BeerService beerService;
+    @Autowired
+    MockMvc mockMvc;
 
-    @Mock
-    private BeerMapper beerMapper;
+    @Autowired
+    public ObjectMapper objectMapper;
 
-    @InjectMocks
-    private BeerController beerController;
+    private Beer testBeerEntity;
+    private BeerInputDto testBeerInputDto;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+
+        testBeerEntity = createTestBeerEntity();
+        testBeerInputDto = createTestBeerInputDto();
     }
 
-    // Test for getBeerStock - Successful case
     @Test
-    void getBeerStock_shouldReturnStock_whenBeerExists() {
-        // Mock a beer stock value
-        int mockStock = 50;
-        when(beerService.getBeerStock(anyLong())).thenReturn(mockStock);
 
-        // Act: Call the controller method
-        ResponseEntity<Integer> response = beerController.getBeerStock(1L);
-
-        // Assert: Verify the response
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(mockStock, response.getBody());
-        verify(beerService, times(1)).getBeerStock(1L);
+    void getAllBeers() throws Exception {
+        mockMvc.perform(get("/api/v1/beers"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(6)))
+                .andExpect(jsonPath("$[0].name", is("Test Beer")))
+                .andExpect(jsonPath("$[0].brand", is("Test Brand")));
     }
 
-    // Test for getBeerStock - Beer not found
     @Test
-    void getBeerStock_shouldThrowResourceNotFound_whenBeerDoesNotExist() {
-        // Simulate the service returning a ResourceNotFoundException
-        when(beerService.getBeerStock(anyLong())).thenThrow(new ResourceNotFoundException("Beer with ID 1 not found"));
+    void getBeerById() throws Exception {
 
-        // Act & Assert: Call the controller method and expect an exception
-        ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> beerController.getBeerStock(1L));
+        mockMvc.perform(get("/api/v1/beers/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", is("Test Beer")))
+                .andExpect(jsonPath("$.brand", is("Test Brand")));
+    }
 
-        // Assert: Verify the exception message
-        assertEquals("Beer with ID 1 not found", thrown.getMessage());
-        verify(beerService, times(1)).getBeerStock(1L);
+    @Test
+    void addBeer() throws Exception {
+        mockMvc.perform(post("/api/v1/beers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(testBeerInputDto)))
+               .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name", is("Test Beer")))
+                .andExpect(jsonPath("$.brand", is("Test Brand")));
+    }
+
+    @Test
+    void updateBeer() throws Exception {
+        BeerInputDto updatedBeerInput = createUpdatedBeerInputDto();
+
+        mockMvc.perform(put("/api/v1/beers/100")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedBeerInput)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", is("Updated Beer")))
+                .andExpect(jsonPath("$.brand", is("Updated Brand")));
+    }
+
+    @Test
+    void deleteBeer() throws Exception {
+        mockMvc.perform(delete("/api/v1/beers/200"))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/api/v1/beers/200"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getBeerStock() throws Exception {
+        mockMvc.perform(get("/api/v1/beers/100/in-stock"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", is(15)));
+    }
+
+    private Beer createTestBeerEntity() {
+        Category category = new Category();
+        category.setBeerCategoryName("Lager");
+
+
+        Beer beer = new Beer();
+        beer.setName("Test Beer");
+        beer.setBrand("Test Brand");
+        beer.setPrice(BigDecimal.valueOf(5.00));
+        beer.setInStock(10);
+        beer.setAbv(5.0F);
+        beer.setBrewery("Test Brewery");
+        beer.setCategory(category);
+//        beer.setCategory(categoryRepository.findByBeerCategoryName("Lager"));  // Fixed method name
+//        return beerRepository.save(beer);
+        return beer;
+    }
+
+    private BeerInputDto createTestBeerInputDto() {
+        BeerInputDto dto = new BeerInputDto();
+        dto.setName("Test Beer");
+        dto.setBrand("Test Brand");
+        dto.setPrice(BigDecimal.valueOf(5.00));
+        dto.setInStock(10);
+        dto.setAbv(5.0F);
+        dto.setCategory(1l);
+        return dto;
+    }
+
+    private BeerInputDto createUpdatedBeerInputDto() {
+        BeerInputDto dto = new BeerInputDto();
+        dto.setName("Updated Beer");
+        dto.setBrand("Updated Brand");
+        dto.setPrice(BigDecimal.valueOf(6.00));
+        dto.setInStock(15);
+        dto.setAbv(6.0F);
+        return dto;
     }
 }

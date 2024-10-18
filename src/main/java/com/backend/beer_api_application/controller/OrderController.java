@@ -37,6 +37,7 @@ public class OrderController {
         this.orderMapper = orderMapper;
     }
 
+    // Get all orders
     @GetMapping("/orders")
     public ResponseEntity<List<OrderOutputDto>> getAllOrders() {
         List<Order> orders = orderService.findAllOrders();
@@ -46,12 +47,14 @@ public class OrderController {
         return ResponseEntity.ok(orderOutputDtos);
     }
 
+    // Get an order by ID
     @GetMapping("/orders/{id}")
     public ResponseEntity<OrderOutputDto> getOrderById(@PathVariable Long id) {
         Order order = orderService.findOrderById(id);
         return ResponseEntity.ok(orderMapper.TransferToOrderOutputDto(order));
     }
 
+    // Add a new order
     @PostMapping("/orders")
     public ResponseEntity<OrderOutputDto> createOrder(@Valid @RequestBody OrderInputDto orderInputDto) {
         Customer customer = customerRepository.findById(orderInputDto.getCustomerId())
@@ -62,6 +65,7 @@ public class OrderController {
                 .body(orderMapper.TransferToOrderOutputDto(newOrder));
     }
 
+    // Update an existing order by ID
     @PatchMapping("/orders/{id}/status")
     public ResponseEntity<OrderOutputDto> updateOrderStatus(@PathVariable Long id, @RequestBody OrderStatus newStatus) {
         try {
@@ -72,12 +76,14 @@ public class OrderController {
         }
     }
 
+    // Delete an order by ID
     @DeleteMapping("/orders/{id}")
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
         orderService.deleteOrderById(id);
         return ResponseEntity.noContent().build();
     }
 
+    // Add an order line to an order
     @PostMapping("/orders/{orderId}/order-lines")
     public ResponseEntity<OrderOutputDto> addOrderLineToOrder(@PathVariable Long orderId, @Valid @RequestBody OrderLine orderLine) {
         try {
@@ -88,6 +94,7 @@ public class OrderController {
         }
     }
 
+    // Remove an order line from an order
     @DeleteMapping("/orders/{orderId}/order-lines/{orderLineId}")
     public ResponseEntity<OrderOutputDto> removeOrderLineFromOrder(@PathVariable Long orderId, @PathVariable Long orderLineId) {
         try {

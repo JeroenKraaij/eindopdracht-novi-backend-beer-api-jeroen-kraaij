@@ -1,15 +1,15 @@
 package com.backend.beer_api_application.models;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Getter
-@Setter
+@Data
 @Table(name = "categories")
 public class Category {
 
@@ -17,11 +17,15 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = false)
     private String beerCategoryName;
     private String beerCategoryType;
     private String beerCategoryDescription;
 
-    @OneToMany
+    // Properly mapped relationship with Beer entity
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @EqualsAndHashCode.Exclude  // To avoid recursive calls during equality checks
+    @ToString.Exclude           // To avoid recursive toString calls, which can lead to stack overflow
     private Set<Beer> beers = new HashSet<>();
 
     // Default constructor

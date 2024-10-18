@@ -1,7 +1,6 @@
 package com.backend.beer_api_application.services;
 
 import com.backend.beer_api_application.dto.input.TasteInputDto;
-import com.backend.beer_api_application.dto.mapper.TasteMapper;
 import com.backend.beer_api_application.dto.output.TasteOutputDto;
 import com.backend.beer_api_application.exceptions.RecordNotFoundException;
 import com.backend.beer_api_application.models.Taste;
@@ -35,6 +34,7 @@ class TasteServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
+    // Test getAllTastes
     @Test
     void getAllTastes_shouldReturnTasteOutputDtoList_whenTastesExist() {
         List<Taste> tasteList = new ArrayList<>();
@@ -50,6 +50,18 @@ class TasteServiceTest {
         verify(tasteRepository, times(1)).findAll();
     }
 
+    @Test
+    void getAllTastes_shouldReturnEmptyList_whenNoTastesExist() {
+        when(tasteRepository.findAll()).thenReturn(new ArrayList<>());
+
+        List<TasteOutputDto> result = tasteService.getAllTastes();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(tasteRepository, times(1)).findAll();
+    }
+
+    // Test getTasteById
     @Test
     void getTasteById_shouldReturnTasteOutputDto_whenTasteExists() {
         Taste mockTaste = new Taste();
@@ -72,6 +84,24 @@ class TasteServiceTest {
         verify(tasteRepository, times(1)).findById(1L);
     }
 
+    // Test addTaste
+    @Test
+    void addTaste_shouldSaveTasteAndReturnTasteOutputDto() {
+        TasteInputDto inputDto = new TasteInputDto();
+        Taste mockTaste = new Taste();
+        Taste savedTaste = new Taste();
+        savedTaste.setId(1L);
+
+        when(tasteRepository.save(any(Taste.class))).thenReturn(savedTaste);
+
+        TasteOutputDto result = tasteService.addTaste(inputDto);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        verify(tasteRepository, times(1)).save(any(Taste.class));
+    }
+
+    // Test updateTaste
     @Test
     void updateTaste_shouldUpdateAndReturnTaste_whenTasteExists() {
         TasteInputDto inputDto = new TasteInputDto();
@@ -99,6 +129,7 @@ class TasteServiceTest {
         verify(tasteRepository, times(1)).findById(1L);
     }
 
+    // Test deleteTaste
     @Test
     void deleteTaste_shouldDeleteTaste_whenTasteExists() {
         when(tasteRepository.existsById(1L)).thenReturn(true);
