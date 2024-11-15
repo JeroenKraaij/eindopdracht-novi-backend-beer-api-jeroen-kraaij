@@ -3,6 +3,7 @@ package com.backend.beer_api_application.controller;
 import com.backend.beer_api_application.dto.output.BeerOutputDto;
 import com.backend.beer_api_application.dto.input.BeerInputDto;
 import com.backend.beer_api_application.exceptions.RecordNotFoundException;
+import com.backend.beer_api_application.models.Beer;
 import com.backend.beer_api_application.services.BeerService;
 import com.backend.beer_api_application.dto.mapper.BeerMapper;
 import jakarta.transaction.Transactional;
@@ -26,7 +27,6 @@ public class BeerController {
         this.beerMapper = beerMapper;
     }
 
-    // Get all beers
     @GetMapping(value = "/beers")
     public ResponseEntity<List<BeerOutputDto>> getAllBeers(@RequestParam(value = "brand", required = false) String brand) {
         List<BeerOutputDto> dtos = (brand == null || brand.isEmpty())
@@ -38,9 +38,8 @@ public class BeerController {
     @GetMapping(value = "/beers/{id}")
     @Transactional
     public ResponseEntity<BeerOutputDto> getBeerById(@PathVariable Long id) {
-        BeerOutputDto beerDto = beerService.getBeerById(id)
-                .map(beerMapper::transferToBeerOutputDto)
-                .orElseThrow(() -> new RecordNotFoundException("Beer with ID " + id + " not found"));
+        Beer beer = beerService.getBeerById(id).orElseThrow(() -> new RecordNotFoundException("Beer with test1 ID " + id + " not found"));
+        BeerOutputDto beerDto = beerMapper.transferToBeerOutputDto(beer);
         return ResponseEntity.ok(beerDto);
     }
 
@@ -55,7 +54,13 @@ public class BeerController {
     @SneakyThrows
     @PutMapping(value = "/beers/{id}")
     public ResponseEntity<BeerOutputDto> updateBeer(@PathVariable Long id, @Valid @RequestBody BeerInputDto newBeer) {
+        if (beerService.getBeerById(id).isEmpty()) {
+            throw new RecordNotFoundException("Beer with ID " + id + " not found");
+        }
         BeerOutputDto dto = beerService.updateBeer(id, newBeer);
+        if (dto == null) {
+            throw new RecordNotFoundException("Unable to update beer with ID " + id);
+        }
         return ResponseEntity.ok(dto);
     }
 
@@ -68,11 +73,12 @@ public class BeerController {
         return ResponseEntity.noContent().build();
     }
 
-    // Add the inStock for a specific beer by ID
     @GetMapping(value = "/beers/{id}/in-stock")
     public ResponseEntity<Integer> getBeerStock(@PathVariable Long id) {
         Integer stock = beerService.getBeerStock(id);
-
+        if (stock == null) {
+            throw new RecordNotFoundException("Beer with ID " + id + " not found");
+        }
         return ResponseEntity.ok(stock);
     }
 }

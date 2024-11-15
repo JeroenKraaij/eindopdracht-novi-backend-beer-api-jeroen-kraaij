@@ -55,13 +55,11 @@ public class OrderLineController {
         return beerService.getBeerById(orderLineInputDto.getBeerId())
                 .map(beer -> {
                     try {
-                        // Create order line after validating stock
                         OrderLine orderLine = new OrderLine(beer, orderLineInputDto.getQuantity());
                         OrderLine savedOrderLine = orderLineService.addOrderLine(orderLine);
                         return ResponseEntity.status(HttpStatus.CREATED)
                                 .body(orderLineMapper.transferToOrderLineOutputDto(savedOrderLine));
                     } catch (IllegalArgumentException | OutOfStockException ex) {
-                        // Return a 400 Bad Request if stock is insufficient
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
                     }
                 })

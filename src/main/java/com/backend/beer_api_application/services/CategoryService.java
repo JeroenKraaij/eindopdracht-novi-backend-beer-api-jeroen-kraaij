@@ -6,11 +6,12 @@ import com.backend.beer_api_application.models.Category;
 import com.backend.beer_api_application.repositories.BeerRepository;
 import com.backend.beer_api_application.repositories.CategoryRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,37 +29,28 @@ public class CategoryService {
 
     @Transactional(readOnly = true)
     public List<CategoryOutputDto> getAllCategories() {
-        List<Category> categories = categoryRepository.findAll();
-
-        return categories.stream().map(category -> {
-            CategoryOutputDto dto = new CategoryOutputDto();
-            dto.setId(category.getId());
-            dto.setBeerCategoryName(category.getBeerCategoryName());
-            dto.setBeerCategoryType(category.getBeerCategoryType());
-            dto.setBeerCategoryDescription(category.getBeerCategoryDescription());
-            return dto;
-        }).collect(Collectors.toList());
+        return categoryRepository.findAll().stream()
+                .map(category -> {
+                    CategoryOutputDto dto = new CategoryOutputDto();
+                    dto.setId(category.getId());
+                    dto.setBeerCategoryName(category.getBeerCategoryName());
+                    dto.setBeerCategoryType(category.getBeerCategoryType());
+                    dto.setBeerCategoryDescription(category.getBeerCategoryDescription());
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public CategoryOutputDto getCategoryById(Long id) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Category not found with ID: " + id));
-
-        CategoryOutputDto dto = new CategoryOutputDto();
-        dto.setId(category.getId());
-        dto.setBeerCategoryName(category.getBeerCategoryName());
-        dto.setBeerCategoryType(category.getBeerCategoryType());
-        dto.setBeerCategoryDescription(category.getBeerCategoryDescription());
-
-        return dto;
+    public Optional<Category> getCategoryById(Long id) {
+        return categoryRepository.findById(id);
     }
 
     @Transactional
     public CategoryOutputDto addCategory(CategoryInputDto categoryInputDto) {
         if (categoryInputDto == null) {
             logger.error("CategoryInputDto cannot be null");
-            throw new IllegalArgumentException("CategoryInputDto cannot be null");
+            return null;  // Indicate invalid input
         }
 
         Category category = new Category();
@@ -81,8 +73,8 @@ public class CategoryService {
 
     @Transactional
     public CategoryOutputDto updateCategory(Long id, CategoryInputDto categoryInputDto) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Category not found with ID: " + id));
+        Category category = categoryRepository.findById(id).orElse(null);
+        if (category == null) return null;
 
         category.setBeerCategoryName(categoryInputDto.getBeerCategoryName());
         category.setBeerCategoryType(categoryInputDto.getBeerCategoryType());
@@ -102,11 +94,12 @@ public class CategoryService {
     }
 
     @Transactional
-    public void deleteCategory(Long id) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Category not found with ID: " + id));
-
-        categoryRepository.delete(category);
+    public boolean deleteCategory(Long id) {
+        if (!categoryRepository.existsById(id)) {
+            return false;
+        }
+        categoryRepository.deleteById(id);
         logger.info("Category deleted with ID: {}", id);
+        return true;
     }
 }

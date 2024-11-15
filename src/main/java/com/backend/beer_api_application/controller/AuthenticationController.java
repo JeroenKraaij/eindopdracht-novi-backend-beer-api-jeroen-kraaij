@@ -44,12 +44,12 @@ public class AuthenticationController {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(username, password)
             );
+
         } catch (BadCredentialsException ex) {
             throw new Exception("Incorrect username or password", ex);
         }
 
         final UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-
         final String jwt = jwtUtil.generateToken(userDetails);
 
         return ResponseEntity.ok(new AuthenticationOutputDto(jwt));

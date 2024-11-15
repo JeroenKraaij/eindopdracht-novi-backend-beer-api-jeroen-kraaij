@@ -30,7 +30,6 @@ public class UserService {
         this.customerRepository = customerRepository;
     }
 
-    // Fetch all users
     public List<UserOutputDto> getUsers() {
         return userRepository.findAll()
                 .stream()
@@ -38,13 +37,11 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    // Fetch a user by username and convert to DTO
     public UserOutputDto getUser(String username) {
-        User user = findUserByUsername(username); // Reuse method to find user
+        User user = findUserByUsername(username);
         return UserMapper.transferToUserOutputDto(user);
     }
 
-    // Fetch a user entity by username (used for security purposes)
     public User findUserByUsername(String username) {
         return userRepository.findById(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));

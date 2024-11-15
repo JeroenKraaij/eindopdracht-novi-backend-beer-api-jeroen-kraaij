@@ -24,21 +24,18 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Get all users
     @GetMapping(value = "/users")
     public ResponseEntity<List<UserOutputDto>> getAllUsers() {
         List<UserOutputDto> userOutputDtos = userService.getUsers();
         return ResponseEntity.ok().body(userOutputDtos);
     }
 
-    // Get a user by username
     @GetMapping(value = "/users/{username}")
     public ResponseEntity<UserOutputDto> getUserByName(@PathVariable("username") String username) {
         UserOutputDto userDto = userService.getUser(username);
         return ResponseEntity.ok().body(userDto);
     }
 
-    // Add a new user
     @PostMapping(value = "/users")
     public ResponseEntity<UserOutputDto> createUser(@Valid @RequestBody UserInputDto userInputDto) {
         try {

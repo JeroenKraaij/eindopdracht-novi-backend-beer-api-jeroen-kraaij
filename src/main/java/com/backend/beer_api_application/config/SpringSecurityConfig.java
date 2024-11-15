@@ -100,11 +100,11 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/order-lines/{id}").hasAnyRole("ADMIN", "USER")
 
                         // USER
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users").hasAnyRole("ADMIN, USER, EDITOR")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users/{id}").hasAnyRole("ADMIN, USER, EDITOR")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/users").hasAnyRole("ADMIN, USER, EDITOR")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/{id}").hasAnyRole("ADMIN, USER, EDITOR")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/{id}").hasAnyRole("ADMIN, USER, EDITOR")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/{id}").hasAnyRole("ADMIN", "USER", "EDITOR")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users").hasAnyRole("ADMIN", "USER", "EDITOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/{id}").hasAnyRole("ADMIN", "USER", "EDITOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/{id}").hasAnyRole("ADMIN")
 
                         // Common/public endpoints
                         .requestMatchers("/api/v1/authenticated").authenticated()

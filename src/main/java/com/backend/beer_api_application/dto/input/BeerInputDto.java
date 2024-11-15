@@ -57,7 +57,6 @@ public class BeerInputDto {
     @Positive(message = "Price must be positive")
     private BigDecimal price;
 
-    @NotNull(message = "Image is mandatory")
     private MultipartFile imageFile;
 
     @NotNull(message = "Stock is mandatory")
