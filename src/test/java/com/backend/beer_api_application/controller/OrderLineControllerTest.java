@@ -102,10 +102,10 @@ class OrderLineControllerTest {
         // Mock input and entities
         OrderLineInputDto mockOrderLineInputDto = new OrderLineInputDto();
         mockOrderLineInputDto.setBeerId(1L);
-        mockOrderLineInputDto.setQuantity(3); // Requesting 3 units of beer with ID 1
+        mockOrderLineInputDto.setQuantity(10); // Requesting 3 units of beer with ID 1
         Beer mockBeer = new Beer();
         mockBeer.setId(1L);
-        mockBeer.setInStock(10); // 10 units available in stock
+        mockBeer.setInStock(8); // 10 units available in stock
         OrderLine mockOrderLine = new OrderLine(mockBeer, 3);
         OrderLineOutputDto mockOrderLineOutputDto = new OrderLineOutputDto();
 

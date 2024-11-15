@@ -3,6 +3,7 @@ package com.backend.beer_api_application.controller;
 import com.backend.beer_api_application.dto.input.TasteInputDto;
 import com.backend.beer_api_application.dto.output.TasteOutputDto;
 import com.backend.beer_api_application.services.TasteService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,14 +36,14 @@ public class TasteController {
 
     // Add a new taste
     @PostMapping("/tastes")
-    public ResponseEntity<TasteOutputDto> addTaste(@RequestBody TasteInputDto tasteInputDto) {
+    public ResponseEntity<TasteOutputDto> addTaste(@Valid @RequestBody TasteInputDto tasteInputDto) {
         TasteOutputDto createdTaste = tasteService.addTaste(tasteInputDto);
         return new ResponseEntity<>(createdTaste, HttpStatus.CREATED);
     }
 
     // Update an existing taste by ID
     @PutMapping("/tastes/{id}")
-    public ResponseEntity<TasteOutputDto> updateTaste(@PathVariable Long id, @RequestBody TasteInputDto tasteInputDto) {
+    public ResponseEntity<TasteOutputDto> updateTaste(@PathVariable Long id, @Valid @RequestBody TasteInputDto tasteInputDto) {
         TasteOutputDto updatedTaste = tasteService.updateTaste(id, tasteInputDto);
         return ResponseEntity.ok(updatedTaste);
     }

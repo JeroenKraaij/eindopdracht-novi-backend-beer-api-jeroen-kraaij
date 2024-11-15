@@ -4,6 +4,7 @@ import com.backend.beer_api_application.dto.input.UserInputDto;
 import com.backend.beer_api_application.dto.output.UserOutputDto;
 import com.backend.beer_api_application.exceptions.RequestValidationException;
 import com.backend.beer_api_application.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -39,7 +40,7 @@ public class UserController {
 
     // Add a new user
     @PostMapping(value = "/users")
-    public ResponseEntity<UserOutputDto> createUser(@RequestBody UserInputDto userInputDto) {
+    public ResponseEntity<UserOutputDto> createUser(@Valid @RequestBody UserInputDto userInputDto) {
         try {
 
             String newUsername = userService.createUser(userInputDto);

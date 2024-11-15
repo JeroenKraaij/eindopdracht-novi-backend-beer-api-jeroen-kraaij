@@ -67,7 +67,7 @@ public class OrderController {
 
     // Update an existing order by ID
     @PatchMapping("/orders/{id}/status")
-    public ResponseEntity<OrderOutputDto> updateOrderStatus(@PathVariable Long id, @RequestBody OrderStatus newStatus) {
+    public ResponseEntity<OrderOutputDto> updateOrderStatus(@RequestBody @PathVariable Long id,  OrderStatus newStatus) {
         try {
             Order updatedOrder = orderService.updateOrderStatus(id, newStatus);
             return ResponseEntity.ok(orderMapper.TransferToOrderOutputDto(updatedOrder));
@@ -85,7 +85,7 @@ public class OrderController {
 
     // Add an order line to an order
     @PostMapping("/orders/{orderId}/order-lines")
-    public ResponseEntity<OrderOutputDto> addOrderLineToOrder(@PathVariable Long orderId, @Valid @RequestBody OrderLine orderLine) {
+    public ResponseEntity<OrderOutputDto> addOrderLineToOrder(@Valid @PathVariable Long orderId, @RequestBody OrderLine orderLine) {
         try {
             Order updatedOrder = orderService.addOrderLineToOrder(orderId, orderLine);
             return ResponseEntity.ok(orderMapper.TransferToOrderOutputDto(updatedOrder));

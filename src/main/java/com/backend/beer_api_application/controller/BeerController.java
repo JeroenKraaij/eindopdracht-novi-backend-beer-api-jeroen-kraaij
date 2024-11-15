@@ -2,10 +2,11 @@ package com.backend.beer_api_application.controller;
 
 import com.backend.beer_api_application.dto.output.BeerOutputDto;
 import com.backend.beer_api_application.dto.input.BeerInputDto;
-import com.backend.beer_api_application.exceptions.ResourceNotFoundException;
+import com.backend.beer_api_application.exceptions.RecordNotFoundException;
 import com.backend.beer_api_application.services.BeerService;
 import com.backend.beer_api_application.dto.mapper.BeerMapper;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.SneakyThrows;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,38 +35,34 @@ public class BeerController {
         return ResponseEntity.ok(dtos);
     }
 
-    // Get a beer by ID
     @GetMapping(value = "/beers/{id}")
     @Transactional
     public ResponseEntity<BeerOutputDto> getBeerById(@PathVariable Long id) {
         BeerOutputDto beerDto = beerService.getBeerById(id)
                 .map(beerMapper::transferToBeerOutputDto)
-                .orElseThrow(() -> new ResourceNotFoundException("Beer with ID " + id + " not found"));
+                .orElseThrow(() -> new RecordNotFoundException("Beer with ID " + id + " not found"));
         return ResponseEntity.ok(beerDto);
     }
 
-    // Add a new beer
     @SneakyThrows
     @PostMapping(value = "/beers")
-    public ResponseEntity<BeerOutputDto> addBeer(@RequestBody BeerInputDto beerInputDto) {
+    public ResponseEntity<BeerOutputDto> addBeer(@Valid @RequestBody BeerInputDto beerInputDto) {
         BeerOutputDto dto = beerService.addBeer(beerInputDto);
         URI location = URI.create(String.format("/api/v1/beers/%d", dto.getId()));
         return ResponseEntity.created(location).body(dto);
     }
 
-    // Update an existing beer by ID
     @SneakyThrows
     @PutMapping(value = "/beers/{id}")
-    public ResponseEntity<BeerOutputDto> updateBeer(@PathVariable Long id, @RequestBody BeerInputDto newBeer) {
+    public ResponseEntity<BeerOutputDto> updateBeer(@PathVariable Long id, @Valid @RequestBody BeerInputDto newBeer) {
         BeerOutputDto dto = beerService.updateBeer(id, newBeer);
         return ResponseEntity.ok(dto);
     }
 
-    // Delete a beer by ID
     @DeleteMapping(value = "/beers/{id}")
     public ResponseEntity<Void> deleteBeer(@PathVariable Long id) {
         if (beerService.getBeerById(id).isEmpty()) {
-            throw new ResourceNotFoundException("Beer with ID " + id + " not found");
+            throw new RecordNotFoundException("Beer with ID " + id + " not found");
         }
         beerService.deleteBeer(id);
         return ResponseEntity.noContent().build();
@@ -75,6 +72,7 @@ public class BeerController {
     @GetMapping(value = "/beers/{id}/in-stock")
     public ResponseEntity<Integer> getBeerStock(@PathVariable Long id) {
         Integer stock = beerService.getBeerStock(id);
+
         return ResponseEntity.ok(stock);
     }
 }
