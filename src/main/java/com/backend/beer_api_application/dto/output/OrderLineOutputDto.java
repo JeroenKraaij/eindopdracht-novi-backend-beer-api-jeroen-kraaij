@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 @Data
 public class OrderLineOutputDto {
 
-    private Long id;  //    Order line ID
+    private Long id;
     private Long beerId;  // Beer ID for reference
     private String beerName;  // Name of the beer
     private String beerType;  // Type of the beer (optional for further beer categorization)

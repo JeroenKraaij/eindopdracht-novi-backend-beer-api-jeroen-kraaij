@@ -34,7 +34,7 @@ public class CustomerController {
         return ResponseEntity.ok(customer);
     }
 
-    // Add a Customer
+
     @PostMapping(value = "/customers")
     public ResponseEntity<CustomerOutputDto> createCustomer(@Valid @RequestBody CustomerInputDto request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -44,8 +44,7 @@ public class CustomerController {
 
     // Update a Customer
     @PutMapping(value = "/customers/{id}")
-    public ResponseEntity<CustomerOutputDto> updateCustomer(@PathVariable("id") Long customerId,
-                                                            @Valid @RequestBody CustomerInputDto updateRequest) {
+    public ResponseEntity<CustomerOutputDto> updateCustomer(@Valid @RequestBody @PathVariable("id") Long customerId, CustomerInputDto updateRequest) {
         CustomerOutputDto updatedCustomer = customerService.updateCustomer(customerId, updateRequest);
         return ResponseEntity.ok(updatedCustomer);
     }

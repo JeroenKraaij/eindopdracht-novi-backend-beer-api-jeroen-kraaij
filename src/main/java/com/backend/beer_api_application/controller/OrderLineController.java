@@ -71,9 +71,7 @@ public class OrderLineController {
 
     // Update an order line with stock validation
     @PutMapping(value = "/order-lines/{id}")
-    public ResponseEntity<?> updateOrderLine(
-            @PathVariable Long id,
-            @Valid @RequestBody OrderLineInputDto orderLineInputDto) {
+    public ResponseEntity<?> updateOrderLine(@PathVariable Long id, @Valid @RequestBody OrderLineInputDto orderLineInputDto) {
 
         return beerService.getBeerById(orderLineInputDto.getBeerId())
                 .map(beer -> {

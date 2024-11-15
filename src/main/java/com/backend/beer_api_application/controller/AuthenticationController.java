@@ -29,13 +29,11 @@ public class AuthenticationController {
         this.jwtUtil = jwtUtil;
     }
 
-    // Authenticate the user
     @GetMapping("/authenticate")
     public ResponseEntity<Object> authenticated(Authentication authentication, Principal principal) {
         return ResponseEntity.ok().body(principal);
     }
 
-    // Create an authentication token
     @PostMapping(value = "/authenticate")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationInputDto authenticationRequest) throws Exception {
 
@@ -43,7 +41,6 @@ public class AuthenticationController {
         String password = authenticationRequest.getPassword();
 
         try {
-            // Authenticate the user with username and password
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(username, password)
             );
@@ -51,13 +48,10 @@ public class AuthenticationController {
             throw new Exception("Incorrect username or password", ex);
         }
 
-        // Load user details
         final UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
 
-        // Generate JWT token
         final String jwt = jwtUtil.generateToken(userDetails);
 
-        // Return the token in the response
         return ResponseEntity.ok(new AuthenticationOutputDto(jwt));
     }
 }
