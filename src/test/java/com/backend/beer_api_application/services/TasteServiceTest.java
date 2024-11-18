@@ -69,10 +69,11 @@ class TasteServiceTest {
 
         when(tasteRepository.findById(1L)).thenReturn(Optional.of(mockTaste));
 
-        TasteOutputDto result = tasteService.getTasteById(1L);
+        Taste result = tasteService.getTasteById(1L).orElseThrow(() -> new RecordNotFoundException("Taste not found"));
+        TasteOutputDto resultDto = mapToDto(result);
 
-        assertNotNull(result);
-        assertEquals(1L, result.getId());
+        assertNotNull(resultDto);
+        assertEquals(1L, resultDto.getId());
         verify(tasteRepository, times(1)).findById(1L);
     }
 
@@ -129,7 +130,6 @@ class TasteServiceTest {
         verify(tasteRepository, times(1)).findById(1L);
     }
 
-    // Test deleteTaste
     @Test
     void deleteTaste_shouldDeleteTaste_whenTasteExists() {
         when(tasteRepository.existsById(1L)).thenReturn(true);
@@ -145,5 +145,12 @@ class TasteServiceTest {
 
         assertThrows(RecordNotFoundException.class, () -> tasteService.deleteTaste(1L));
         verify(tasteRepository, never()).deleteById(anyLong());
+    }
+
+    private TasteOutputDto mapToDto(Taste taste) {
+        TasteOutputDto dto = new TasteOutputDto();
+        dto.setId(taste.getId());
+        dto.setName(taste.getName());
+        return dto;
     }
 }

@@ -3,7 +3,6 @@ package com.backend.beer_api_application.controller;
 import com.backend.beer_api_application.dto.input.OrderLineInputDto;
 import com.backend.beer_api_application.dto.mapper.OrderLineMapper;
 import com.backend.beer_api_application.dto.output.OrderLineOutputDto;
-import com.backend.beer_api_application.exceptions.OutOfStockException;
 import com.backend.beer_api_application.models.OrderLine;
 import com.backend.beer_api_application.services.BeerService;
 import com.backend.beer_api_application.services.OrderLineService;
@@ -32,7 +31,6 @@ public class OrderLineController {
         this.orderLineMapper = orderLineMapper;
     }
 
-    // Get all order lines
     @GetMapping(value = "/order-lines")
     public ResponseEntity<List<OrderLineOutputDto>> getAllOrderLines() {
         List<OrderLine> orderLines = orderLineService.findAllOrderLines();
@@ -42,56 +40,59 @@ public class OrderLineController {
         return ResponseEntity.ok(orderLineOutputDtos);
     }
 
-    // Get an order line by ID
     @GetMapping(value = "/order-lines/{id}")
-    public ResponseEntity<OrderLineOutputDto> getOrderLineById(@PathVariable Long id) {
+    public ResponseEntity<?> getOrderLineById(@PathVariable Long id) {
         OrderLine orderLine = orderLineService.findOrderLineById(id);
+        if (orderLine == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("OrderLine with ID " + id + " not found");
+        }
         return ResponseEntity.ok(orderLineMapper.transferToOrderLineOutputDto(orderLine));
     }
 
-    // Create a new order line with stock validation
     @PostMapping(value = "/order-lines")
     public ResponseEntity<?> createOrderLine(@Valid @RequestBody OrderLineInputDto orderLineInputDto) {
         return beerService.getBeerById(orderLineInputDto.getBeerId())
                 .map(beer -> {
-                    try {
-                        // Create order line after validating stock
-                        OrderLine orderLine = new OrderLine(beer, orderLineInputDto.getQuantity());
-                        OrderLine savedOrderLine = orderLineService.addOrderLine(orderLine);
-                        return ResponseEntity.status(HttpStatus.CREATED)
-                                .body(orderLineMapper.transferToOrderLineOutputDto(savedOrderLine));
-                    } catch (IllegalArgumentException | OutOfStockException ex) {
-                        // Return a 400 Bad Request if stock is insufficient
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+                    if (beer.getInStock() < orderLineInputDto.getQuantity()) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body("Beer with ID " + orderLineInputDto.getBeerId() + " is out of stock.");
                     }
+                    OrderLine orderLine = new OrderLine(beer, orderLineInputDto.getQuantity());
+                    OrderLine savedOrderLine = orderLineService.addOrderLine(orderLine);
+                    return ResponseEntity.status(HttpStatus.CREATED)
+                            .body(orderLineMapper.transferToOrderLineOutputDto(savedOrderLine));
                 })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Beer with ID " + orderLineInputDto.getBeerId() + " not found"));
     }
 
-    // Update an order line with stock validation
     @PutMapping(value = "/order-lines/{id}")
     public ResponseEntity<?> updateOrderLine(@PathVariable Long id, @Valid @RequestBody OrderLineInputDto orderLineInputDto) {
-
         return beerService.getBeerById(orderLineInputDto.getBeerId())
                 .map(beer -> {
-                    try {
-                        // Update order line after validating stock
-                        OrderLine updatedOrderLine = new OrderLine(beer, orderLineInputDto.getQuantity());
-                        OrderLine savedOrderLine = orderLineService.updateOrderLine(id, updatedOrderLine);
-                        return ResponseEntity.ok(orderLineMapper.transferToOrderLineOutputDto(savedOrderLine));
-                    } catch (IllegalArgumentException | OutOfStockException ex) {
-                        // Return a 400 Bad Request if stock is insufficient
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+                    if (beer.getInStock() < orderLineInputDto.getQuantity()) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body("Beer with ID " + orderLineInputDto.getBeerId() + " is out of stock.");
                     }
+                    OrderLine existingOrderLine = orderLineService.findOrderLineById(id);
+                    if (existingOrderLine == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("OrderLine with ID " + id + " not found");
+                    }
+                    existingOrderLine.setBeer(beer);
+                    existingOrderLine.setQuantity(orderLineInputDto.getQuantity());
+                    OrderLine updatedOrderLine = orderLineService.updateOrderLine(existingOrderLine);
+                    return ResponseEntity.ok(orderLineMapper.transferToOrderLineOutputDto(updatedOrderLine));
                 })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Beer with ID " + orderLineInputDto.getBeerId() + " not found"));
     }
 
-    // Delete an order line by ID
     @DeleteMapping(value = "/order-lines/{id}")
-    public ResponseEntity<Void> deleteOrderLine(@PathVariable Long id) {
+    public ResponseEntity<?> deleteOrderLine(@PathVariable Long id) {
+        if (!orderLineService.orderLineExists(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("OrderLine with ID " + id + " not found");
+        }
         orderLineService.deleteOrderLineById(id);
         return ResponseEntity.noContent().build();
     }

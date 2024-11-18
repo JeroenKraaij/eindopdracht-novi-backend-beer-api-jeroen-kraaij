@@ -3,8 +3,6 @@ package com.backend.beer_api_application.services;
 import com.backend.beer_api_application.dto.input.CustomerInputDto;
 import com.backend.beer_api_application.dto.output.CustomerOutputDto;
 import com.backend.beer_api_application.dto.mapper.CustomerMapper;
-import com.backend.beer_api_application.exceptions.RecordNotFoundException;
-import com.backend.beer_api_application.exceptions.UserAlreadyExistsException;
 import com.backend.beer_api_application.models.Customer;
 import com.backend.beer_api_application.models.User;
 import com.backend.beer_api_application.repositories.CustomerRepository;
@@ -37,19 +35,30 @@ public class CustomerService {
 
     @Transactional(readOnly = true)
     public CustomerOutputDto getCustomerById(Long id) {
-        Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new RecordNotFoundException("Customer not found with ID: " + id));
-        return CustomerMapper.transferToCustomerOutputDto(customer);
+        return customerRepository.findById(id)
+                .map(CustomerMapper::transferToCustomerOutputDto)
+                .orElse(null);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsById(Long id) {
+        return customerRepository.existsById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean userHasCustomer(String username) {
+        return userRepository.findUserByUsername(username)
+                .map(user -> user.getCustomer() != null)
+                .orElse(false);
     }
 
     @Transactional
     public CustomerOutputDto addCustomer(CustomerInputDto customerInputDto, Authentication userDetails) {
-
         Optional<User> user = userRepository.findUserByUsername(userDetails.getName());
-        if (user.get().getCustomer()!=null){
-            throw new UserAlreadyExistsException("Customer already exists with ID: " + user.get().getCustomer().getId());
-
+        if (user.isEmpty() || user.get().getCustomer() != null) {
+            return null;
         }
+
         Customer customer = CustomerMapper.transferToCustomerEntity(customerInputDto);
         customer.setUser(user.get());
         Customer savedCustomer = customerRepository.save(customer);
@@ -58,12 +67,14 @@ public class CustomerService {
 
     @Transactional
     public CustomerOutputDto updateCustomer(Long id, CustomerInputDto customerInputDto) {
-        Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new RecordNotFoundException("Customer not found with ID: " + id));
+        Optional<Customer> customerOptional = customerRepository.findById(id);
+        if (customerOptional.isEmpty()) {
+            return null;
+        }
 
+        Customer customer = customerOptional.get();
         updateCustomerEntity(customer, customerInputDto);
         Customer updatedCustomer = customerRepository.save(customer);
-
         return CustomerMapper.transferToCustomerOutputDto(updatedCustomer);
     }
 
@@ -80,9 +91,6 @@ public class CustomerService {
 
     @Transactional
     public void deleteCustomer(Long id) {
-        if (!customerRepository.existsById(id)) {
-            throw new RecordNotFoundException("Customer not found with ID: " + id);
-        }
         customerRepository.deleteById(id);
     }
 }

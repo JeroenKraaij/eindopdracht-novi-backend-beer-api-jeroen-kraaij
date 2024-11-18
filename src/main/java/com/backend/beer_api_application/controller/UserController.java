@@ -2,10 +2,11 @@ package com.backend.beer_api_application.controller;
 
 import com.backend.beer_api_application.dto.input.UserInputDto;
 import com.backend.beer_api_application.dto.output.UserOutputDto;
-import com.backend.beer_api_application.exceptions.RequestValidationException;
 import com.backend.beer_api_application.services.UserService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -24,40 +25,37 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Get all users
     @GetMapping(value = "/users")
     public ResponseEntity<List<UserOutputDto>> getAllUsers() {
         List<UserOutputDto> userOutputDtos = userService.getUsers();
         return ResponseEntity.ok().body(userOutputDtos);
     }
 
-    // Get a user by username
     @GetMapping(value = "/users/{username}")
-    public ResponseEntity<UserOutputDto> getUserByName(@PathVariable("username") String username) {
-        UserOutputDto userDto = userService.getUser(username);
-        return ResponseEntity.ok().body(userDto);
-    }
-
-    // Add a new user
-    @PostMapping(value = "/users")
-    public ResponseEntity<UserOutputDto> createUser(@Valid @RequestBody UserInputDto userInputDto) {
+    public ResponseEntity<?> getUserByName(@PathVariable("username") String username) {
         try {
-
-            String newUsername = userService.createUser(userInputDto);
-            userService.addAuthority(newUsername, "ROLE_USER");
-
-            URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{username}")
-                    .buildAndExpand(newUsername).toUri();
-
-            return ResponseEntity.created(location).build();
-        } catch (Exception ex) {
-            throw new RequestValidationException("Invalid input data: " + ex.getMessage());
+            UserOutputDto userDto = userService.getUser(username);
+            return ResponseEntity.ok().body(userDto);
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found: " + username);
         }
     }
 
-    // Update an existing user by username
+    @PostMapping(value = "/users")
+    public ResponseEntity<?> createUser(@Valid @RequestBody UserInputDto userInputDto) {
+        try {
+            String newUsername = userService.createUser(userInputDto);
+            userService.addAuthority(newUsername, "ROLE_USER");
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{username}")
+                    .buildAndExpand(newUsername).toUri();
+            return ResponseEntity.created(location).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input data: " + e.getMessage());
+        }
+    }
+
     @PutMapping(value = "/users/{username}")
-    public ResponseEntity<UserOutputDto> updateUser(@PathVariable("username") String username, @RequestBody Map<String, Object> request) {
+    public ResponseEntity<?> updateUser(@PathVariable("username") String username, @RequestBody Map<String, Object> request) {
         try {
             String email = (String) request.get("email");
             Boolean enabled = (Boolean) request.get("enabled");
@@ -68,42 +66,50 @@ public class UserController {
             userDto.setEnabled(enabled);
 
             userService.updateUser(username, userDto, newRawPassword);
-
             return ResponseEntity.noContent().build();
-        } catch (Exception ex) {
-            throw new RequestValidationException("Invalid input data: " + ex.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found: " + username);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input data: " + e.getMessage());
         }
     }
 
-    // Delete a user by username
     @DeleteMapping(value = "/users/{username}")
-    public ResponseEntity<Object> deleteUser(@PathVariable("username") String username) {
+    public ResponseEntity<?> deleteUser(@PathVariable("username") String username) {
+        if (!userService.userExists(username)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found: " + username);
+        }
         userService.deleteUser(username);
         return ResponseEntity.noContent().build();
     }
 
-
     @GetMapping(value = "/users/{username}/authorities")
-    public ResponseEntity<Object> getUserAuthorities(@PathVariable("username") String username) {
-        return ResponseEntity.ok().body(userService.getAuthorities(username));
+    public ResponseEntity<?> getUserAuthorities(@PathVariable("username") String username) {
+        try {
+            return ResponseEntity.ok().body(userService.getAuthorities(username));
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found: " + username);
+        }
     }
 
-    // Add an authority to a user
     @PostMapping(value = "/users/{username}/authorities")
-    public ResponseEntity<Object> addUserAuthority(@PathVariable("username") String username, @RequestBody Map<String, Object> fields) {
+    public ResponseEntity<?> addUserAuthority(@PathVariable("username") String username, @RequestBody Map<String, Object> fields) {
         try {
             String authorityName = (String) fields.get("authority");
             userService.addAuthority(username, authorityName);
             return ResponseEntity.noContent().build();
-        } catch (Exception ex) {
-            throw new RequestValidationException(ex.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
-    //
     @DeleteMapping(value = "/users/{username}/authorities/{authority}")
-    public ResponseEntity<Object> deleteUserAuthority(@PathVariable("username") String username, @PathVariable("authority") String authority) {
-        userService.removeAuthority(username, authority);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> deleteUserAuthority(@PathVariable("username") String username, @PathVariable("authority") String authority) {
+        try {
+            userService.removeAuthority(username, authority);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 }

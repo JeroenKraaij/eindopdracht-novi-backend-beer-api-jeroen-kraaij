@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserMapper {
 
-    // Convert User entity to UserOutputDto
     public static UserOutputDto transferToUserOutputDto(User user) {
         UserOutputDto dto = new UserOutputDto();
         dto.setUsername(user.getUsername());
@@ -20,7 +19,6 @@ public class UserMapper {
         return dto;
     }
 
-    // Convert UserOutputDto to User entity
     public static User transferToUserEntity(UserInputDto dto) {
         User user = new User();
         user.setUsername(dto.getUserName());

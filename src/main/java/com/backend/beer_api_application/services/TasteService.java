@@ -3,13 +3,13 @@ package com.backend.beer_api_application.services;
 import com.backend.beer_api_application.dto.input.TasteInputDto;
 import com.backend.beer_api_application.dto.mapper.TasteMapper;
 import com.backend.beer_api_application.dto.output.TasteOutputDto;
-import com.backend.beer_api_application.exceptions.RecordNotFoundException;
 import com.backend.beer_api_application.models.Taste;
 import com.backend.beer_api_application.repositories.TasteRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,14 +29,21 @@ public class TasteService {
     }
 
     @Transactional
-    public TasteOutputDto getTasteById(Long id) {
-        Taste taste = tasteRepository.findById(id)
-                .orElseThrow(() -> new RecordNotFoundException("Taste not found with ID: " + id));
-        return TasteMapper.transferToTasteOutputDto(taste);
+    public Optional<Taste> getTasteById(Long id) {
+        return tasteRepository.findById(id);
+    }
+
+    @Transactional
+    public Optional<Taste> findByName(String name) {
+        return tasteRepository.findByName(name);
     }
 
     @Transactional
     public TasteOutputDto addTaste(TasteInputDto tasteInputDto) {
+        if (findByName(tasteInputDto.getName()).isPresent()) {
+            return null;
+        }
+
         Taste taste = TasteMapper.transferToTasteEntity(tasteInputDto);
         Taste savedTaste = tasteRepository.save(taste);
         return TasteMapper.transferToTasteOutputDto(savedTaste);
@@ -44,8 +51,12 @@ public class TasteService {
 
     @Transactional
     public TasteOutputDto updateTaste(Long id, TasteInputDto tasteInputDto) {
-        Taste taste = tasteRepository.findById(id)
-                .orElseThrow(() -> new RecordNotFoundException("Taste not found with ID: " + id));
+        Taste taste = tasteRepository.findById(id).orElse(null);
+        if (taste == null) return null;
+        Optional<Taste> existingTaste = findByName(tasteInputDto.getName());
+        if (existingTaste.isPresent() && !existingTaste.get().getId().equals(id)) {
+            return null;
+        }
 
         TasteMapper.updateTasteEntity(taste, tasteInputDto);
         Taste updatedTaste = tasteRepository.save(taste);
@@ -53,10 +64,11 @@ public class TasteService {
     }
 
     @Transactional
-    public void deleteTaste(Long id) {
+    public boolean deleteTaste(Long id) {
         if (!tasteRepository.existsById(id)) {
-            throw new RecordNotFoundException("Taste not found with ID: " + id);
+            return false;
         }
         tasteRepository.deleteById(id);
+        return true;
     }
 }

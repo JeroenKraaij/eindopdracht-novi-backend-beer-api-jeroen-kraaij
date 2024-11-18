@@ -19,23 +19,18 @@ public class Taste {
 
     @ManyToMany(mappedBy = "tastes")
     private List<Beer> beers = new ArrayList<>();
-
-    // Default constructor
     public Taste() {}
-
-    // Constructor with name
     public Taste(String name) {
         this.name = name;
     }
 
-    // Helper methods to manage beers
-    public void addBeer(Beer beer) {
-        beers.add(beer);
-        beer.getTastes().add(this);
-    }
-
-    public void removeBeer(Beer beer) {
-        beers.remove(beer);
-        beer.getTastes().remove(this);
-    }
+//    public void addBeer(Beer beer) {
+//        beers.add(beer);
+//        beer.getTastes().add(this);
+//    }
+//
+//    public void removeBeer(Beer beer) {
+//        beers.remove(beer);
+//        beer.getTastes().remove(this);
+//    }
 }

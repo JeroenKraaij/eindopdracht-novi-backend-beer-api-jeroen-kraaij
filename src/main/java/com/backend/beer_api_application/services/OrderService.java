@@ -1,7 +1,6 @@
 package com.backend.beer_api_application.services;
 
 import com.backend.beer_api_application.enums.OrderStatus;
-import com.backend.beer_api_application.exceptions.OrderNotFoundException;
 import com.backend.beer_api_application.models.Customer;
 import com.backend.beer_api_application.models.Order;
 import com.backend.beer_api_application.models.OrderLine;
@@ -25,61 +24,62 @@ public class OrderService {
         this.orderServiceHelper = orderServiceHelper;
     }
 
-    // Find all orders
     @Transactional
     public List<Order> findAllOrders() {
         return orderRepository.findAll();
     }
 
-    // Find an order by ID
     @Transactional
     public Order findOrderById(Long orderId) {
-        return orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException("Order with ID " + orderId + " not found"));
+        return orderRepository.findById(orderId).orElse(null);
     }
 
-    // Create a new order
     @Transactional
     public Order addNewOrder(Customer customer, List<OrderLine> orderLines) {
         Order newOrder = new Order();
         newOrder.setCustomer(customer);
         newOrder.setOrderStatus(OrderStatus.PENDING);
-
         orderServiceHelper.addOrderLinesToOrder(newOrder, orderLines);
-
         return orderRepository.save(newOrder);
     }
 
-    // Update the status of an order
     @Transactional
     public Order updateOrderStatus(Long orderId, OrderStatus newStatus) {
-        Order order = orderServiceHelper.getOrderById(orderId);
-        order.setOrderStatus(newStatus);
-        return orderRepository.save(order);
+        Order order = findOrderById(orderId);
+        if (order != null) {
+            order.setOrderStatus(newStatus);
+            return orderRepository.save(order);
+        }
+        return null;
     }
 
-    // Add OrderLines to an existing order
     @Transactional
     public Order addOrderLineToOrder(Long orderId, OrderLine orderLine) {
-        Order order = orderServiceHelper.getOrderById(orderId);
-        orderServiceHelper.addOrderLine(order, orderLine);
-        return orderRepository.save(order);
+        Order order = findOrderById(orderId);
+        if (order != null) {
+            orderServiceHelper.addOrderLine(order, orderLine);
+            return orderRepository.save(order);
+        }
+        return null;
     }
 
-    // Remove an OrderLine from an order
     @Transactional
     public Order removeOrderLineFromOrder(Long orderId, Long orderLineId) {
-        Order order = orderServiceHelper.getOrderById(orderId);
-        orderServiceHelper.removeOrderLine(order, orderLineId);
-        return orderRepository.save(order);
+        Order order = findOrderById(orderId);
+        if (order != null) {
+            orderServiceHelper.removeOrderLine(order, orderLineId);
+            return orderRepository.save(order);
+        }
+        return null;
     }
 
-    // Delete an order by ID
     @Transactional
     public void deleteOrderById(Long id) {
-        if (!orderRepository.existsById(id)) {
-            throw new OrderNotFoundException("Order with ID " + id + " not found");
-        }
         orderRepository.deleteById(id);
+    }
+
+    @Transactional
+    public boolean existsById(Long orderId) {
+        return orderRepository.existsById(orderId);
     }
 }

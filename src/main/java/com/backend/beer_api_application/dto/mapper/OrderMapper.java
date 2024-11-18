@@ -26,7 +26,6 @@ public class OrderMapper {
         this.orderLineMapper = orderLineMapper;
     }
 
-    // Map Order entity to OrderOutputDto
     public OrderOutputDto TransferToOrderOutputDto(Order order) {
         OrderOutputDto dto = new OrderOutputDto();
         dto.setId(order.getId());
@@ -35,7 +34,6 @@ public class OrderMapper {
         return dto;
     }
 
-    // Set customer-related fields
     private void setCustomerDetails(Order order, OrderOutputDto dto) {
         Customer customer = order.getCustomer();
         dto.setCustomerId(customer.getId());
@@ -47,7 +45,6 @@ public class OrderMapper {
         dto.setCustomerEmail(customer.getUser().getEmail());
     }
 
-    // Set order-related fields
     private void setOrderDetails(Order order, OrderOutputDto dto) {
         dto.setOrderDate(order.getOrderDate());
         dto.setOrderStatus(order.getOrderStatus().name());
@@ -61,14 +58,12 @@ public class OrderMapper {
         dto.setPaymentMethod(String.valueOf(order.getPaymentMethod()));
     }
 
-    // Convert List of OrderLineInputDto to List of OrderLine entities
     public List<OrderLine> transferToOrderLineList(List<OrderLineInputDto> dtos) {
         return dtos.stream()
                 .map(this::transferToOrderLine)
                 .collect(Collectors.toList());
     }
 
-    // Convert OrderLineInputDto to OrderLine entity
     public OrderLine transferToOrderLine(OrderLineInputDto dto) {
         Beer beer = beerRepository.findById(dto.getBeerId())
                 .orElseThrow(() -> new RuntimeException("Beer with ID " + dto.getBeerId() + " not found"));

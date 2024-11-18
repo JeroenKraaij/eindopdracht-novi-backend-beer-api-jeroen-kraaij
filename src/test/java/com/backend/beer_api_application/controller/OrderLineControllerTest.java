@@ -3,7 +3,6 @@ package com.backend.beer_api_application.controller;
 import com.backend.beer_api_application.dto.input.OrderLineInputDto;
 import com.backend.beer_api_application.dto.mapper.OrderLineMapper;
 import com.backend.beer_api_application.dto.output.OrderLineOutputDto;
-import com.backend.beer_api_application.exceptions.OutOfStockException;
 import com.backend.beer_api_application.models.Beer;
 import com.backend.beer_api_application.models.OrderLine;
 import com.backend.beer_api_application.services.BeerService;
@@ -20,7 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ActiveProfiles("test")
@@ -45,25 +44,23 @@ class OrderLineControllerTest {
 
     @Test
     void createOrderLine_shouldReturnCreatedOrderLine_whenStockIsSufficient() {
-        // Mock input and entities
         OrderLineInputDto mockOrderLineInputDto = new OrderLineInputDto();
         mockOrderLineInputDto.setBeerId(1L);
-        mockOrderLineInputDto.setQuantity(5); // Requesting 5 units of beer with ID 1
+        mockOrderLineInputDto.setQuantity(5);
+
         Beer mockBeer = new Beer();
         mockBeer.setId(1L);
-        mockBeer.setInStock(10); // 10 units available in stock
+        mockBeer.setInStock(10);
+
         OrderLine mockOrderLine = new OrderLine(mockBeer, 5);
         OrderLineOutputDto mockOrderLineOutputDto = new OrderLineOutputDto();
 
-        // Mock service behavior
-        when(beerService.getBeerById(1L)).thenReturn(Optional.of(mockBeer)); // Beer found
+        when(beerService.getBeerById(1L)).thenReturn(Optional.of(mockBeer));
         when(orderLineService.addOrderLine(any(OrderLine.class))).thenReturn(mockOrderLine);
         when(orderLineMapper.transferToOrderLineOutputDto(mockOrderLine)).thenReturn(mockOrderLineOutputDto);
 
-        // Act: Call the controller method
         ResponseEntity<?> response = orderLineController.createOrderLine(mockOrderLineInputDto);
 
-        // Assert: Check the response
         assertNotNull(response);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(mockOrderLineOutputDto, response.getBody());
@@ -73,72 +70,62 @@ class OrderLineControllerTest {
 
     @Test
     void createOrderLine_shouldReturnBadRequest_whenStockIsInsufficient() {
-        // Mock input and entities
         OrderLineInputDto mockOrderLineInputDto = new OrderLineInputDto();
         mockOrderLineInputDto.setBeerId(1L);
-        mockOrderLineInputDto.setQuantity(15); // Requesting 15 units, stock is 10
+        mockOrderLineInputDto.setQuantity(15);
+
         Beer mockBeer = new Beer();
         mockBeer.setId(1L);
-        mockBeer.setInStock(16); // 10 units available in stock
+        mockBeer.setInStock(10);
 
-        // Mock service behavior
-        when(beerService.getBeerById(1L)).thenReturn(Optional.of(mockBeer)); // Beer found
-        when(orderLineService.addOrderLine(any(OrderLine.class)))
-                .thenThrow(new OutOfStockException("Insufficient stock for beer ID 1"));
+        when(beerService.getBeerById(1L)).thenReturn(Optional.of(mockBeer));
 
-        // Act: Call the controller method
         ResponseEntity<?> response = orderLineController.createOrderLine(mockOrderLineInputDto);
 
-        // Assert: Check the response
         assertNotNull(response);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Insufficient stock for beer ID 1", response.getBody());
-        verify(orderLineService, times(1)).addOrderLine(any(OrderLine.class));
+        assertEquals("Beer with ID 1 is out of stock.", response.getBody());
+        verify(orderLineService, never()).addOrderLine(any(OrderLine.class));
         verify(beerService, times(1)).getBeerById(1L);
     }
 
     @Test
     void updateOrderLine_shouldReturnUpdatedOrderLine_whenStockIsSufficient() {
-        // Mock input and entities
         OrderLineInputDto mockOrderLineInputDto = new OrderLineInputDto();
         mockOrderLineInputDto.setBeerId(1L);
-        mockOrderLineInputDto.setQuantity(10); // Requesting 3 units of beer with ID 1
+        mockOrderLineInputDto.setQuantity(5);
+
         Beer mockBeer = new Beer();
         mockBeer.setId(1L);
-        mockBeer.setInStock(8); // 10 units available in stock
-        OrderLine mockOrderLine = new OrderLine(mockBeer, 3);
+        mockBeer.setInStock(8);
+
+        OrderLine mockOrderLine = new OrderLine(mockBeer, 5);
         OrderLineOutputDto mockOrderLineOutputDto = new OrderLineOutputDto();
 
-        // Mock service behavior
-        when(beerService.getBeerById(1L)).thenReturn(Optional.of(mockBeer)); // Beer found
-        when(orderLineService.updateOrderLine(anyLong(), any(OrderLine.class))).thenReturn(mockOrderLine);
+        when(beerService.getBeerById(1L)).thenReturn(Optional.of(mockBeer));
+        when(orderLineService.findOrderLineById(1L)).thenReturn(mockOrderLine);
+        when(orderLineService.updateOrderLine(any(OrderLine.class))).thenReturn(mockOrderLine);
         when(orderLineMapper.transferToOrderLineOutputDto(mockOrderLine)).thenReturn(mockOrderLineOutputDto);
 
-        // Act: Call the controller method
         ResponseEntity<?> response = orderLineController.updateOrderLine(1L, mockOrderLineInputDto);
 
-        // Assert: Check the response
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(mockOrderLineOutputDto, response.getBody());
-        verify(orderLineService, times(1)).updateOrderLine(eq(1L), any(OrderLine.class));
+        verify(orderLineService, times(1)).updateOrderLine(any(OrderLine.class));
         verify(beerService, times(1)).getBeerById(1L);
     }
 
     @Test
     void createOrderLine_shouldReturnBadRequest_whenBeerNotFound() {
-        // Mock input
         OrderLineInputDto mockOrderLineInputDto = new OrderLineInputDto();
         mockOrderLineInputDto.setBeerId(1L);
         mockOrderLineInputDto.setQuantity(5);
 
-        // Mock service behavior
-        when(beerService.getBeerById(1L)).thenReturn(Optional.empty()); // Beer not found
+        when(beerService.getBeerById(1L)).thenReturn(Optional.empty());
 
-        // Act: Call the controller method
         ResponseEntity<?> response = orderLineController.createOrderLine(mockOrderLineInputDto);
 
-        // Assert: Check the response
         assertNotNull(response);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("Beer with ID 1 not found", response.getBody());
