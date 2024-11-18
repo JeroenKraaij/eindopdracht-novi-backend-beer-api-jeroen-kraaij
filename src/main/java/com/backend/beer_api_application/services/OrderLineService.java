@@ -1,6 +1,5 @@
 package com.backend.beer_api_application.services;
 
-import com.backend.beer_api_application.exceptions.OrderLineNotFoundException;
 import com.backend.beer_api_application.models.OrderLine;
 import com.backend.beer_api_application.repositories.OrderLineRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,44 +18,33 @@ public class OrderLineService {
         this.orderLineRepository = orderLineRepository;
     }
 
-    // Create or update an OrderLine
     @Transactional
     public OrderLine addOrderLine(OrderLine orderLine) {
         return orderLineRepository.save(orderLine);
     }
 
-    // Find an OrderLine by ID
     @Transactional(readOnly = true)
     public OrderLine findOrderLineById(Long id) {
-        return orderLineRepository.findById(id)
-                .orElseThrow(() -> new OrderLineNotFoundException("OrderLine with ID " + id + " not found"));
+        return orderLineRepository.findById(id).orElse(null);
     }
 
-    // Find all OrderLines
     @Transactional(readOnly = true)
     public List<OrderLine> findAllOrderLines() {
         return orderLineRepository.findAll();
     }
 
-    // Update an OrderLine
     @Transactional
-    public OrderLine updateOrderLine(Long id, OrderLine updatedOrderLine) {
-        OrderLine existingOrderLine = findOrderLineById(id);  // Fetch the existing order line
-
-        // Update the fields of the existing order line with the new values
-        existingOrderLine.setBeer(updatedOrderLine.getBeer());
-        existingOrderLine.setQuantity(updatedOrderLine.getQuantity());
-        existingOrderLine.setPriceAtPurchase(updatedOrderLine.getPriceAtPurchase());
-
-        return orderLineRepository.save(existingOrderLine);  // Save the updated order line
+    public OrderLine updateOrderLine(OrderLine updatedOrderLine) {
+        return orderLineRepository.save(updatedOrderLine);
     }
 
-    // Delete an OrderLine by ID
     @Transactional
     public void deleteOrderLineById(Long id) {
-        if (!orderLineRepository.existsById(id)) {
-            throw new OrderLineNotFoundException("OrderLine with ID " + id + " not found");
-        }
         orderLineRepository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean orderLineExists(Long id) {
+        return orderLineRepository.existsById(id);
     }
 }

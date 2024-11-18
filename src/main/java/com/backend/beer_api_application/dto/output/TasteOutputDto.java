@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class TasteOutputDto {
+
     private Long id;
     private String name;
 }

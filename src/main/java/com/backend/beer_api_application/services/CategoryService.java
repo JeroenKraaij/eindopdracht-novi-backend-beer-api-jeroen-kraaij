@@ -3,11 +3,8 @@ package com.backend.beer_api_application.services;
 import com.backend.beer_api_application.dto.input.CategoryInputDto;
 import com.backend.beer_api_application.dto.output.CategoryOutputDto;
 import com.backend.beer_api_application.models.Category;
-import com.backend.beer_api_application.repositories.BeerRepository;
 import com.backend.beer_api_application.repositories.CategoryRepository;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -17,89 +14,74 @@ import java.util.stream.Collectors;
 @Service
 public class CategoryService {
 
-    private static final Logger logger = LoggerFactory.getLogger(CategoryService.class);
-
     private final CategoryRepository categoryRepository;
-    private final BeerRepository beerRepository;
 
-    public CategoryService(CategoryRepository categoryRepository, BeerRepository beerRepository) {
+    public CategoryService(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
-        this.beerRepository = beerRepository;
     }
 
     @Transactional(readOnly = true)
     public List<CategoryOutputDto> getAllCategories() {
         return categoryRepository.findAll().stream()
-                .map(category -> {
-                    CategoryOutputDto dto = new CategoryOutputDto();
-                    dto.setId(category.getId());
-                    dto.setBeerCategoryName(category.getBeerCategoryName());
-                    dto.setBeerCategoryType(category.getBeerCategoryType());
-                    dto.setBeerCategoryDescription(category.getBeerCategoryDescription());
-                    return dto;
-                })
+                .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public Optional<Category> getCategoryById(Long id) {
-        return categoryRepository.findById(id);
+    public Optional<CategoryOutputDto> getCategoryById(Long id) {
+        return categoryRepository.findById(id).map(this::mapToDto);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsByName(String name) {
+        return categoryRepository.findByBeerCategoryName(name).isPresent();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsByName(String name, Long excludeId) {
+        return categoryRepository.findByBeerCategoryName(name)
+                .map(category -> !category.getId().equals(excludeId))
+                .orElse(false);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsById(Long id) {
+        return categoryRepository.existsById(id);
     }
 
     @Transactional
     public CategoryOutputDto addCategory(CategoryInputDto categoryInputDto) {
-        if (categoryInputDto == null) {
-            logger.error("CategoryInputDto cannot be null");
-            return null;  // Indicate invalid input
-        }
-
         Category category = new Category();
         category.setBeerCategoryName(categoryInputDto.getBeerCategoryName());
         category.setBeerCategoryType(categoryInputDto.getBeerCategoryType());
         category.setBeerCategoryDescription(categoryInputDto.getBeerCategoryDescription());
 
         Category savedCategory = categoryRepository.save(category);
-
-        CategoryOutputDto categoryOutputDto = new CategoryOutputDto();
-        categoryOutputDto.setId(savedCategory.getId());
-        categoryOutputDto.setBeerCategoryName(savedCategory.getBeerCategoryName());
-        categoryOutputDto.setBeerCategoryType(savedCategory.getBeerCategoryType());
-        categoryOutputDto.setBeerCategoryDescription(savedCategory.getBeerCategoryDescription());
-
-        logger.info("Category created with ID: {}", savedCategory.getId());
-
-        return categoryOutputDto;
+        return mapToDto(savedCategory);
     }
 
     @Transactional
     public CategoryOutputDto updateCategory(Long id, CategoryInputDto categoryInputDto) {
-        Category category = categoryRepository.findById(id).orElse(null);
-        if (category == null) return null;
-
+        Category category = categoryRepository.findById(id).orElseThrow();
         category.setBeerCategoryName(categoryInputDto.getBeerCategoryName());
         category.setBeerCategoryType(categoryInputDto.getBeerCategoryType());
         category.setBeerCategoryDescription(categoryInputDto.getBeerCategoryDescription());
 
         Category updatedCategory = categoryRepository.save(category);
-
-        CategoryOutputDto categoryOutputDto = new CategoryOutputDto();
-        categoryOutputDto.setId(updatedCategory.getId());
-        categoryOutputDto.setBeerCategoryName(updatedCategory.getBeerCategoryName());
-        categoryOutputDto.setBeerCategoryType(updatedCategory.getBeerCategoryType());
-        categoryOutputDto.setBeerCategoryDescription(updatedCategory.getBeerCategoryDescription());
-
-        logger.info("Category updated with ID: {}", updatedCategory.getId());
-
-        return categoryOutputDto;
+        return mapToDto(updatedCategory);
     }
 
     @Transactional
-    public boolean deleteCategory(Long id) {
-        if (!categoryRepository.existsById(id)) {
-            return false;
-        }
+    public void deleteCategory(Long id) {
         categoryRepository.deleteById(id);
-        logger.info("Category deleted with ID: {}", id);
-        return true;
+    }
+
+    private CategoryOutputDto mapToDto(Category category) {
+        CategoryOutputDto dto = new CategoryOutputDto();
+        dto.setId(category.getId());
+        dto.setBeerCategoryName(category.getBeerCategoryName());
+        dto.setBeerCategoryType(category.getBeerCategoryType());
+        dto.setBeerCategoryDescription(category.getBeerCategoryDescription());
+        return dto;
     }
 }

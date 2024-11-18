@@ -51,7 +51,6 @@ public class TasteController {
     public ResponseEntity<?> updateTaste(@PathVariable Long id, @Valid @RequestBody TasteInputDto tasteInputDto) {
         TasteOutputDto updatedTaste = tasteService.updateTaste(id, tasteInputDto);
         if (updatedTaste == null) {
-            // Decide between a duplicate or a missing record
             if (tasteService.getTasteById(id).isEmpty()) {
                 throw new RecordNotFoundException("Taste not found with ID: " + id);
             } else {

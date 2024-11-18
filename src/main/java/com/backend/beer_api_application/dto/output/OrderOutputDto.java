@@ -10,8 +10,6 @@ import lombok.Data;
 public class OrderOutputDto {
 
     private Long id;
-
-    // Customer details
     private Long customerId;
     private String customerName;
     private String customerAddress;

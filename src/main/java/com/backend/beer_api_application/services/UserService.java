@@ -47,12 +47,10 @@ public class UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
 
-    // Check if a user exists
     public boolean userExists(String username) {
         return userRepository.existsById(username);
     }
 
-    // Create a new user
     public String createUser(UserInputDto userInputDto) {
         String randomString = RandomStringGenerator.generateAlphaNumeric(20);
         User newUser = UserMapper.transferToUserEntity(userInputDto);
@@ -63,7 +61,6 @@ public class UserService {
         return newUser.getUsername();
     }
 
-    // Delete a user by username
     public void deleteUser(String username) {
         if (!userRepository.existsById(username)) {
             throw new RecordNotFoundException("User not found: " + username);
@@ -71,16 +68,13 @@ public class UserService {
         userRepository.deleteById(username);
     }
 
-    // Update a user by username
     public void updateUser(String username, UserOutputDto updatedUserDto, String newRawPassword) {
         User existingUser = findUserByUsername(username);  // Reuse method to find user
 
-        // Update user fields
         existingUser.setEnabled(updatedUserDto.getEnabled());
         existingUser.setApikey(updatedUserDto.getApikey());
         existingUser.setEmail(updatedUserDto.getEmail());
 
-        // Optionally update the password if a new one is provided
         if (newRawPassword != null && !newRawPassword.isEmpty()) {
             existingUser.setPassword( passwordEncoder.encode(newRawPassword));
         }
@@ -88,13 +82,11 @@ public class UserService {
         userRepository.save(existingUser);
     }
 
-    // Get authorities of a user
     public Set<Authority> getAuthorities(String username) {
         User user = findUserByUsername(username);
         return user.getAuthorities();
     }
 
-    // Add an authority to a user
     public void addAuthority(String username, String authority) {
         User user = findUserByUsername(username);
 
@@ -102,7 +94,6 @@ public class UserService {
         userRepository.save(user);
     }
 
-    // Remove an authority from a user
     public void removeAuthority(String username, String authority) {
         User user = findUserByUsername(username);
 

@@ -2,6 +2,7 @@ package com.backend.beer_api_application.controller;
 
 import com.backend.beer_api_application.dto.input.CategoryInputDto;
 import com.backend.beer_api_application.dto.output.CategoryOutputDto;
+import com.backend.beer_api_application.exceptions.DuplicateResourceException;
 import com.backend.beer_api_application.exceptions.RecordNotFoundException;
 import com.backend.beer_api_application.services.CategoryService;
 import jakarta.validation.Valid;
@@ -30,26 +31,19 @@ public class CategoryController {
     }
 
     @GetMapping(value = "/categories/{id}")
-    public ResponseEntity<?> getCategoryById(@PathVariable Long id) {
-        return categoryService.getCategoryById(id)
-                .map(category -> {
-                    CategoryOutputDto categoryOutputDto = new CategoryOutputDto();
-                    categoryOutputDto.setId(category.getId());
-                    categoryOutputDto.setBeerCategoryName(category.getBeerCategoryName());
-                    categoryOutputDto.setBeerCategoryType(category.getBeerCategoryType());
-                    categoryOutputDto.setBeerCategoryDescription(category.getBeerCategoryDescription());
-                    return ResponseEntity.ok(categoryOutputDto);
-                })
+    public ResponseEntity<CategoryOutputDto> getCategoryById(@PathVariable Long id) {
+        CategoryOutputDto category = categoryService.getCategoryById(id)
                 .orElseThrow(() -> new RecordNotFoundException("Category not found with ID: " + id));
+        return ResponseEntity.ok(category);
     }
 
     @PostMapping(value = "/categories")
-    public ResponseEntity<?> createCategory(@Valid @RequestBody CategoryInputDto categoryInputDto) {
-        CategoryOutputDto categoryOutputDto = categoryService.addCategory(categoryInputDto);
-        if (categoryOutputDto == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Category input");
+    public ResponseEntity<CategoryOutputDto> createCategory(@Valid @RequestBody CategoryInputDto categoryInputDto) {
+        if (categoryService.existsByName(categoryInputDto.getBeerCategoryName())) {
+            throw new DuplicateResourceException("Category with name '" + categoryInputDto.getBeerCategoryName() + "' already exists");
         }
 
+        CategoryOutputDto categoryOutputDto = categoryService.addCategory(categoryInputDto);
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
@@ -60,20 +54,26 @@ public class CategoryController {
     }
 
     @PutMapping(value = "/categories/{id}")
-    public ResponseEntity<?> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryInputDto categoryInputDto) {
-        CategoryOutputDto updatedCategory = categoryService.updateCategory(id, categoryInputDto);
-        if (updatedCategory == null) {
+    public ResponseEntity<CategoryOutputDto> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryInputDto categoryInputDto) {
+        if (!categoryService.existsById(id)) {
             throw new RecordNotFoundException("Category not found with ID: " + id);
         }
+
+        if (categoryService.existsByName(categoryInputDto.getBeerCategoryName(), id)) {
+            throw new DuplicateResourceException("Category with name '" + categoryInputDto.getBeerCategoryName() + "' already exists");
+        }
+
+        CategoryOutputDto updatedCategory = categoryService.updateCategory(id, categoryInputDto);
         return ResponseEntity.ok(updatedCategory);
     }
 
     @DeleteMapping(value = "/categories/{id}")
-    public ResponseEntity<?> deleteCategory(@PathVariable Long id) {
-        boolean deleted = categoryService.deleteCategory(id);
-        if (!deleted) {
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+        if (!categoryService.existsById(id)) {
             throw new RecordNotFoundException("Category not found with ID: " + id);
         }
+
+        categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
     }
 }

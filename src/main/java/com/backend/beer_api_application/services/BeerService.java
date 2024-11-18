@@ -46,6 +46,11 @@ public class BeerService {
         return beerRepository.findById(id);
     }
 
+    @Transactional(readOnly = true)
+    public boolean existsByName(String name) {
+        return beerRepository.findByName(name).isPresent();
+    }
+
     @Transactional
     public BeerOutputDto addBeer(BeerInputDto beerInputDto) throws IOException {
         Beer beer = beerMapper.transferToBeerEntity(beerInputDto);
