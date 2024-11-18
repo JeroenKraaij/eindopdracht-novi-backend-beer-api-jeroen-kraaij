@@ -4,13 +4,15 @@ import com.backend.beer_api_application.models.Beer;
 import com.backend.beer_api_application.models.ImageUpload;
 import com.backend.beer_api_application.repositories.BeerRepository;
 import com.backend.beer_api_application.repositories.ImageUploadRepository;
+import com.backend.beer_api_application.utils.ImageUploadHelper;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class ImageUploadService {
@@ -24,33 +26,42 @@ public class ImageUploadService {
     @Transactional
     public ImageUpload uploadImage(Long beerId, MultipartFile file) throws IOException {
         Beer beer = beerRepository.findById(beerId).orElseThrow();
-
-        String fileName = file.getOriginalFilename();
-        String contentType = file.getContentType();
-        long size = file.getSize();
-        byte[] imageData = file.getBytes();
-
-        ImageUpload image = new ImageUpload();
-        image.setFileName(fileName);
-        image.setImageData(imageData);
-        image.setSize(size);
-        image.setContentType(contentType);
-        image.setUploadDate(LocalDateTime.now());
-        image.setBeer(beer);
-        image.setFileExtension(getFileExtension(fileName));
-        image.setIsFeatured(beer.getImageUploads().isEmpty());
-
+        ImageUpload image = ImageUploadHelper.createImageUpload(beer, file);
         return imageUploadRepository.save(image);
     }
 
-    public boolean existsBeerById(Long beerId) {
-        return beerRepository.existsById(beerId);
+    @Transactional
+    public List<ImageUpload> uploadMultipleImages(Long beerId, MultipartFile[] files) throws IOException {
+        Beer beer = beerRepository.findById(beerId).orElseThrow();
+        List<ImageUpload> images = new ArrayList<>();
+
+        for (MultipartFile file : files) {
+            ImageUpload image = ImageUploadHelper.createImageUpload(beer, file);
+            images.add(imageUploadRepository.save(image));
+        }
+
+        return images;
     }
 
-    private String getFileExtension(String fileName) {
-        if (fileName != null && fileName.contains(".")) {
-            return fileName.substring(fileName.lastIndexOf(".") + 1);
-        }
-        return null;
+    @Transactional
+    public ImageUpload updateImage(Long imageId, MultipartFile file) throws IOException {
+        ImageUpload existingImage = imageUploadRepository.findById(imageId).orElseThrow();
+
+        existingImage.setFileName(file.getOriginalFilename());
+        existingImage.setContentType(file.getContentType());
+        existingImage.setSize(file.getSize());
+        existingImage.setImageData(file.getBytes());
+        existingImage.setFileExtension(ImageUploadHelper.getFileExtension(file.getOriginalFilename()));
+
+        return imageUploadRepository.save(existingImage);
+    }
+
+    @Transactional
+    public void deleteImage(Long imageId) {
+        imageUploadRepository.deleteById(imageId);
+    }
+
+    public ImageUpload getImageById(Long imageId) {
+        return imageUploadRepository.findById(imageId).orElseThrow();
     }
 }

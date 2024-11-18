@@ -59,8 +59,12 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/beers/{id}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/beers/{id}/in-stock").hasAnyRole("ADMIN", "EDITOR")
 
-                        // ImageUploadController
+                        // ImageUploadController endpoints
                         .requestMatchers(HttpMethod.POST, "/api/v1/images/upload/{beerId}").hasAnyRole("ADMIN", "EDITOR")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/images/upload/multiple/{beerId}").hasAnyRole("ADMIN", "EDITOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/images/{imageId}").hasAnyRole("ADMIN", "EDITOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/images/{imageId}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/images/{imageId}/download").hasAnyRole("ADMIN", "EDITOR")
 
                         // TasteController endpoints
                         .requestMatchers(HttpMethod.GET, "/api/v1/tastes").permitAll()
