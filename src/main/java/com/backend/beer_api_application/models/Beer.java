@@ -17,14 +17,12 @@ public class Beer {
     private Long id;
 
     @Column
-    private String name, brand, description, color, brewery, temperature, glassware, taste;
-
-    private String country, food;
+    private String name, brand, description, color, brewery, temperature, glassware, taste, country, food;
 
     @Column(nullable = false)
     private Float abv;
 
-    @Column(nullable = true)
+    @Column
     private Integer ibu;
 
     @Column(nullable = false, precision = 10, scale = 2)
@@ -51,20 +49,6 @@ public class Beer {
         return category != null ? category.getBeerCategoryType() : null;
     }
 
-    public void addOrderLine(OrderLine orderLine) {
-        orderLines.add(orderLine);
-        orderLine.setBeer(this);
-    }
-
-    public void removeOrderLine(OrderLine orderLine) {
-        orderLines.remove(orderLine);
-        orderLine.setBeer(null);
-    }
-
-    public void incrementStock(int amount) {
-        this.inStock += amount;
-    }
-
     public void decrementStock(int amount) {
         if (this.inStock - amount >= 0) {
             this.inStock -= amount;
@@ -78,8 +62,8 @@ public class Beer {
         imageUpload.setBeer(this);
     }
 
-    public void removeImage(ImageUpload imageUpload) {
-        imageUploads.remove(imageUpload);
-        imageUpload.setBeer(null);
-    }
+//    public void removeImage(ImageUpload imageUpload) {
+//        imageUploads.remove(imageUpload);
+//        imageUpload.setBeer(null);
+//    }
 }

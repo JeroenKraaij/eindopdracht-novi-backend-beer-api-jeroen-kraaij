@@ -15,13 +15,13 @@ import java.util.Map;
 @ControllerAdvice
 public class ExceptionController {
 
-    @ExceptionHandler(value = ImageNotFoundException.class)
-    public ResponseEntity<Object> handleImageNotFoundException(ImageNotFoundException exception) {
+    @ExceptionHandler(value = RecordNotFoundException.class)
+    public ResponseEntity<Object> handleRecordNotFoundException(RecordNotFoundException exception) {
         return buildErrorResponse(HttpStatus.NOT_FOUND, exception.getMessage());
     }
 
-    @ExceptionHandler(value = RecordNotFoundException.class)
-    public ResponseEntity<Object> handleRecordNotFoundException(RecordNotFoundException exception) {
+    @ExceptionHandler(value = ImageNotFoundException.class)
+    public ResponseEntity<Object> handleImageNotFoundException(ImageNotFoundException exception) {
         return buildErrorResponse(HttpStatus.NOT_FOUND, exception.getMessage());
     }
 
@@ -42,6 +42,11 @@ public class ExceptionController {
 
     @ExceptionHandler(value = OrderNotFoundException.class)
     public ResponseEntity<Object> handleOrderNotFoundException(OrderNotFoundException exception) {
+        return buildErrorResponse(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(value = OrderLineNotFoundException.class)
+    public ResponseEntity<Object> handleOrderLineNotFoundException(OrderLineNotFoundException exception) {
         return buildErrorResponse(HttpStatus.NOT_FOUND, exception.getMessage());
     }
 

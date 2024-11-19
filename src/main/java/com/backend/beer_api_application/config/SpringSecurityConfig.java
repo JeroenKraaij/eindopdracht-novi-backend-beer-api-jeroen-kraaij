@@ -87,14 +87,17 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/v1/customers/{id}").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/customers/{id}").hasAnyRole("ADMIN", "USER")
 
-                        // OrderController endpoints (new configuration)
+                        // OrderController endpoints
                         .requestMatchers(HttpMethod.GET, "/api/v1/orders").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/orders/{id}").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.POST, "/api/v1/orders").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/orders/{id}/status").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/orders/{id}").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.POST, "/api/v1/orders/{orderId}/order-lines").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/orders/{orderId}/order-lines/{orderLineId}").hasAnyRole("ADMIN", "USER")
+
+                        // OrderStatus endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/v1/orders/{id}/status").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/orders/{id}/status").hasAnyRole("ADMIN", "USER")
 
                         // OrderLineController endpoints
                         .requestMatchers(HttpMethod.GET, "/api/v1/order-lines").hasAnyRole("ADMIN", "USER")

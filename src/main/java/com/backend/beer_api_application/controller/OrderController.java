@@ -62,6 +62,15 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(orderMapper.TransferToOrderOutputDto(newOrder));
     }
 
+    @GetMapping("/orders/{id}/status")
+    public ResponseEntity<OrderStatus> getOrderStatus(@PathVariable Long id) {
+        Order order = orderService.findOrderById(id);
+        if (order == null) {
+            throw new OrderNotFoundException("Order with ID " + id + " not found");
+        }
+        return ResponseEntity.ok(order.getOrderStatus());
+    }
+
     @PatchMapping("/orders/{id}/status")
     public ResponseEntity<OrderOutputDto> updateOrderStatus(@PathVariable Long id, @RequestBody OrderStatus newStatus) {
         if (!orderService.existsById(id)) {

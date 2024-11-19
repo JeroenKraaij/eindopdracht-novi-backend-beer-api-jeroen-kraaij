@@ -2,14 +2,11 @@ package com.backend.beer_api_application.models;
 
 import com.backend.beer_api_application.enums.ImageStatus;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-
+import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter
-@Setter
+@Data
 @Table(name = "image_uploads")
 public class ImageUpload {
 

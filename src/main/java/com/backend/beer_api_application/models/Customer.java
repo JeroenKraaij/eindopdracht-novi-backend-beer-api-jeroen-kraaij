@@ -33,13 +33,13 @@ public class Customer {
     @JoinColumn(name = "user_customer", referencedColumnName = "username")
     private User user;
 
-    public void addOrder(Order order) {
-        orders.add(order);
-        order.setCustomer(this);
-    }
-
-    public void removeOrder(Order order) {
-        orders.remove(order);
-        order.setCustomer(null);
-    }
+//    public void addOrder(Order order) {
+//        orders.add(order);
+//        order.setCustomer(this);
+//    }
+//
+//    public void removeOrder(Order order) {
+//        orders.remove(order);
+//        order.setCustomer(null);
+//    }
 }

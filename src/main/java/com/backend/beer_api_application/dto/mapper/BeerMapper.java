@@ -17,7 +17,6 @@ public class BeerMapper {
         this.categoryRepository = categoryRepository;
     }
 
-    // Convert Beer entity to BeerOutputDto
     public BeerOutputDto transferToBeerOutputDto(Beer beer) {
         BeerOutputDto dto = new BeerOutputDto();
         dto.setId(beer.getId());
@@ -47,7 +46,6 @@ public class BeerMapper {
         return dto;
     }
 
-    // Convert BeerInputDto to Beer entity
     public Beer transferToBeerEntity(BeerInputDto beerInputDto) {
         Beer beer = new Beer();
         beer.setName(beerInputDto.getName());

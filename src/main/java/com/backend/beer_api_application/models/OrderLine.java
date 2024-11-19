@@ -2,7 +2,6 @@ package com.backend.beer_api_application.models;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -21,13 +20,12 @@ public class OrderLine {
     private Beer beer;
 
     @ManyToOne
-    @JoinColumn()
+    @JoinColumn
     private Order order;
 
     @Column(nullable = false)
     private Integer quantity;
 
-    @Getter
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal priceAtPurchase;
 
@@ -39,9 +37,7 @@ public class OrderLine {
         }
         this.beer = beer;
         this.quantity = quantity;
-
-        setPriceAtPurchase(priceAtPurchase != null ? priceAtPurchase : beer.getPrice());
-
+        this.priceAtPurchase = beer.getPrice();
         beer.decrementStock(quantity);
     }
 

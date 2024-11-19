@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public class ImageUploadOutputDto {
     private Long id;
     private String fileName;
-    private String url; // URL or file location for accessing the image
+    private String url;
     private Long size;
     private String contentType;
     private LocalDateTime uploadDate;

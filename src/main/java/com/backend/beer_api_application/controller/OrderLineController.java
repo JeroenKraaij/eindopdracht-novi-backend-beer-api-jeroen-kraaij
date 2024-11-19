@@ -3,6 +3,8 @@ package com.backend.beer_api_application.controller;
 import com.backend.beer_api_application.dto.input.OrderLineInputDto;
 import com.backend.beer_api_application.dto.mapper.OrderLineMapper;
 import com.backend.beer_api_application.dto.output.OrderLineOutputDto;
+import com.backend.beer_api_application.exceptions.OrderLineNotFoundException;
+import com.backend.beer_api_application.exceptions.OutOfStockException;
 import com.backend.beer_api_application.models.OrderLine;
 import com.backend.beer_api_application.services.BeerService;
 import com.backend.beer_api_application.services.OrderLineService;
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -41,57 +44,48 @@ public class OrderLineController {
     }
 
     @GetMapping(value = "/order-lines/{id}")
-    public ResponseEntity<?> getOrderLineById(@PathVariable Long id) {
-        OrderLine orderLine = orderLineService.findOrderLineById(id);
-        if (orderLine == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("OrderLine with ID " + id + " not found");
-        }
-        return ResponseEntity.ok(orderLineMapper.transferToOrderLineOutputDto(orderLine));
+    public ResponseEntity<OrderLineOutputDto> getOrderLineById(@PathVariable Long id) {
+        Optional<OrderLine> orderLine = Optional.ofNullable(orderLineService.findOrderLineById(id));
+        OrderLine orderLineEntity = orderLine.orElseThrow(() -> new OrderLineNotFoundException("OrderLine with ID " + id + " not found"));
+        return ResponseEntity.ok(orderLineMapper.transferToOrderLineOutputDto(orderLineEntity));
     }
 
     @PostMapping(value = "/order-lines")
-    public ResponseEntity<?> createOrderLine(@Valid @RequestBody OrderLineInputDto orderLineInputDto) {
+    public ResponseEntity<OrderLineOutputDto> createOrderLine(@Valid @RequestBody OrderLineInputDto orderLineInputDto) {
         return beerService.getBeerById(orderLineInputDto.getBeerId())
                 .map(beer -> {
                     if (beer.getInStock() < orderLineInputDto.getQuantity()) {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                .body("Beer with ID " + orderLineInputDto.getBeerId() + " is out of stock.");
+                        throw new OutOfStockException("Beer with ID " + orderLineInputDto.getBeerId() + " is out of stock.");
                     }
                     OrderLine orderLine = new OrderLine(beer, orderLineInputDto.getQuantity());
                     OrderLine savedOrderLine = orderLineService.addOrderLine(orderLine);
                     return ResponseEntity.status(HttpStatus.CREATED)
                             .body(orderLineMapper.transferToOrderLineOutputDto(savedOrderLine));
                 })
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Beer with ID " + orderLineInputDto.getBeerId() + " not found"));
+                .orElseThrow(() -> new OrderLineNotFoundException("Beer with ID " + orderLineInputDto.getBeerId() + " not found"));
     }
 
     @PutMapping(value = "/order-lines/{id}")
-    public ResponseEntity<?> updateOrderLine(@PathVariable Long id, @Valid @RequestBody OrderLineInputDto orderLineInputDto) {
+    public ResponseEntity<OrderLineOutputDto> updateOrderLine(@PathVariable Long id, @Valid @RequestBody OrderLineInputDto orderLineInputDto) {
         return beerService.getBeerById(orderLineInputDto.getBeerId())
                 .map(beer -> {
                     if (beer.getInStock() < orderLineInputDto.getQuantity()) {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                .body("Beer with ID " + orderLineInputDto.getBeerId() + " is out of stock.");
+                        throw new OutOfStockException("Beer with ID " + orderLineInputDto.getBeerId() + " is out of stock.");
                     }
-                    OrderLine existingOrderLine = orderLineService.findOrderLineById(id);
-                    if (existingOrderLine == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("OrderLine with ID " + id + " not found");
-                    }
-                    existingOrderLine.setBeer(beer);
-                    existingOrderLine.setQuantity(orderLineInputDto.getQuantity());
-                    OrderLine updatedOrderLine = orderLineService.updateOrderLine(existingOrderLine);
+                    Optional<OrderLine> existingOrderLine = Optional.ofNullable(orderLineService.findOrderLineById(id));
+                    OrderLine existingOrderLineEntity = existingOrderLine.orElseThrow(() -> new OrderLineNotFoundException("OrderLine with ID " + id + " not found"));
+                    existingOrderLineEntity.setBeer(beer);
+                    existingOrderLineEntity.setQuantity(orderLineInputDto.getQuantity());
+                    OrderLine updatedOrderLine = orderLineService.updateOrderLine(existingOrderLineEntity);
                     return ResponseEntity.ok(orderLineMapper.transferToOrderLineOutputDto(updatedOrderLine));
                 })
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Beer with ID " + orderLineInputDto.getBeerId() + " not found"));
+                .orElseThrow(() -> new OrderLineNotFoundException("Beer with ID " + orderLineInputDto.getBeerId() + " not found"));
     }
 
     @DeleteMapping(value = "/order-lines/{id}")
-    public ResponseEntity<?> deleteOrderLine(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteOrderLine(@PathVariable Long id) {
         if (!orderLineService.orderLineExists(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("OrderLine with ID " + id + " not found");
+            throw new OrderLineNotFoundException("OrderLine with ID " + id + " not found");
         }
         orderLineService.deleteOrderLineById(id);
         return ResponseEntity.noContent().build();

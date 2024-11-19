@@ -3,9 +3,9 @@ package com.backend.beer_api_application.dto.mapper;
 import com.backend.beer_api_application.dto.output.ImageUploadOutputDto;
 import com.backend.beer_api_application.models.ImageUpload;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class ImageUploadMapper {
 
     @Value("${file.base-url}")
@@ -27,6 +27,7 @@ public class ImageUploadMapper {
         dto.setStatus(imageUpload.getStatus());
         dto.setFileExtension(imageUpload.getFileExtension());
         dto.setBeerId(imageUpload.getBeer().getId());
+
         return dto;
     }
 }

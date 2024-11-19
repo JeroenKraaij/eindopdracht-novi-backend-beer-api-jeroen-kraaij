@@ -45,14 +45,14 @@ public class Order {
     private BigDecimal totalAmountExcludingVat;
     private BigDecimal totalAmountIncludingVat;
 
-    public void setDeliveryAddress() {
-        if (this.customer != null) {
-            this.deliveryAddress = AddressFormatter.formatAddress(
-                    customer.getAddress(),
-                    customer.getHouseNumber(),
-                    customer.getZipcode(),
-                    customer.getCity()
-            );
-        }
-    }
+//    public void setDeliveryAddress() {
+//        if (this.customer != null) {
+//            this.deliveryAddress = AddressFormatter.formatAddress(
+//                    customer.getAddress(),
+//                    customer.getHouseNumber(),
+//                    customer.getZipcode(),
+//                    customer.getCity()
+//            );
+//        }
+//    }
 }
