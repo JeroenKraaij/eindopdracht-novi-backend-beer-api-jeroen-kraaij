@@ -116,6 +116,7 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/{username}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/{username}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/{username}").hasRole("ADMIN")
 
                         // Public en authentication endpoints

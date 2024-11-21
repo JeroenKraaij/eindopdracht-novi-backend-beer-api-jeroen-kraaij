@@ -3,7 +3,6 @@ package com.backend.beer_api_application.controller;
 import com.backend.beer_api_application.dto.input.UserInputDto;
 import com.backend.beer_api_application.dto.output.UserOutputDto;
 import com.backend.beer_api_application.exceptions.RecordNotFoundException;
-import com.backend.beer_api_application.exceptions.SecurityException;
 import com.backend.beer_api_application.models.Authority;
 import com.backend.beer_api_application.services.UserService;
 import jakarta.validation.Valid;
@@ -26,13 +25,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    private void validateAuthenticatedUser(String username) {
-        String currentUsername = getAuthenticatedUsername();
-        if (!currentUsername.equals(username)) {
-            throw new SecurityException("You can only access or modify your own profile.");
-        }
-    }
-
     private String getAuthenticatedUsername() {
         return org.springframework.security.core.context.SecurityContextHolder.getContext()
                 .getAuthentication()
@@ -52,10 +44,12 @@ public class UserController {
         String currentUsername = getAuthenticatedUsername();
 
         String email = (String) request.get("email");
+        String ApiKey = (String) request.get("apikey");
         Boolean enabled = (Boolean) request.get("enabled");
         String newRawPassword = (String) request.get("password");
 
         UserOutputDto userDto = new UserOutputDto();
+        userDto.setApikey(ApiKey);
         userDto.setEmail(email);
         userDto.setEnabled(enabled);
 
@@ -114,7 +108,7 @@ public class UserController {
 
     // User management endpoints by Admin
 
-    @GetMapping(value = "/users/")
+    @GetMapping(value = "/users")
     public ResponseEntity<?> getAllUsers() {
         return ResponseEntity.ok().body(userService.getAllUsers());
     }
@@ -125,5 +119,30 @@ public class UserController {
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{username}")
                 .buildAndExpand(newUsername).toUri();
         return ResponseEntity.created(location).build();
+    }
+
+    @GetMapping(value = "/users/{username}")
+    public ResponseEntity<UserOutputDto> getUserByUsername(@PathVariable String username) {
+        return userService.getUser(username)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new RecordNotFoundException("User not found: " + username));
+    }
+
+    @PutMapping(value = "/users/{username}")
+    public ResponseEntity<Void> addOrUpdateUsername(@PathVariable String username, @Valid @RequestBody UserInputDto userInputDto) {
+        boolean updated = userService.updateUsername(username, userInputDto);
+        if (!updated) {
+            throw new RecordNotFoundException("User not found: " + username);
+        }
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping(value = "/users/{username}")
+    public ResponseEntity<Void> deleteUserByUsername(@PathVariable String username) {
+        boolean deleted = userService.deleteUserByUsername(username);
+        if (!deleted) {
+            throw new RecordNotFoundException("User not found: " + username);
+        }
+        return ResponseEntity.noContent().build();
     }
 }
