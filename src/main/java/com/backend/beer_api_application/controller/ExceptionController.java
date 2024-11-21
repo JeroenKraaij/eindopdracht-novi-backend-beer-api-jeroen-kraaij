@@ -1,6 +1,7 @@
 package com.backend.beer_api_application.controller;
 
 import com.backend.beer_api_application.exceptions.*;
+import com.backend.beer_api_application.exceptions.SecurityException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -38,6 +39,11 @@ public class ExceptionController {
     @ExceptionHandler(value = OutOfStockException.class)
     public ResponseEntity<Object> handleOutOfStockException(OutOfStockException exception) {
         return buildErrorResponse(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<String> handleSecurityException(SecurityException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 
     @ExceptionHandler(value = OrderNotFoundException.class)

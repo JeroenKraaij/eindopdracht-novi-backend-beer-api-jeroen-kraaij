@@ -21,7 +21,7 @@ public class UserMapper {
 
     public static User transferToUserEntity(UserInputDto dto) {
         User user = new User();
-        user.setUsername(dto.getUserName());
+        user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         return user;
     }

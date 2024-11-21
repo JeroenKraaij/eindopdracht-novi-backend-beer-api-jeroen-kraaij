@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "api/v1")
@@ -32,14 +30,6 @@ public class ImageUploadController {
                 imageUploadService.uploadImage(beerId, imageUploadInputDto.getFile())
         );
         return ResponseEntity.ok(outputDto);
-    }
-
-    @PostMapping("/images/upload/multiple/{beerId}")
-    public ResponseEntity<List<ImageUploadOutputDto>> uploadMultipleImages(@PathVariable Long beerId, @RequestParam("files") MultipartFile[] files) throws IOException {
-        List<ImageUploadOutputDto> outputDtos = imageUploadService.uploadMultipleImages(beerId, files).stream()
-                .map(imageUploadMapper::toOutputDto)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(outputDtos);
     }
 
     @PutMapping("/images/{imageId}")

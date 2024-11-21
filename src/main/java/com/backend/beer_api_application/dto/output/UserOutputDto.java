@@ -8,7 +8,6 @@ import java.util.Set;
 @Data
 public class UserOutputDto {
 
-    private Long id;
     private String username;
     private Boolean enabled;
     private String apikey;

@@ -11,8 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class ImageUploadService {
@@ -28,19 +26,6 @@ public class ImageUploadService {
         Beer beer = beerRepository.findById(beerId).orElseThrow();
         ImageUpload image = ImageUploadHelper.createImageUpload(beer, file);
         return imageUploadRepository.save(image);
-    }
-
-    @Transactional
-    public List<ImageUpload> uploadMultipleImages(Long beerId, MultipartFile[] files) throws IOException {
-        Beer beer = beerRepository.findById(beerId).orElseThrow();
-        List<ImageUpload> images = new ArrayList<>();
-
-        for (MultipartFile file : files) {
-            ImageUpload image = ImageUploadHelper.createImageUpload(beer, file);
-            images.add(imageUploadRepository.save(image));
-        }
-
-        return images;
     }
 
     @Transactional
