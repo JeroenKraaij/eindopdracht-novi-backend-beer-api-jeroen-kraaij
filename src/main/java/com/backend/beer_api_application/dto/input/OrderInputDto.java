@@ -10,15 +10,11 @@ import java.util.List;
 @Data
 public class OrderInputDto {
 
-    @NotNull(message = "Customer ID is mandatory")
-    private Long customerId;  // ID of the customer placing the order
+    @NotNull
+    private Long customerId;
 
-    @NotEmpty(message = "Order must contain at least one order line")
-    private List<@Valid @NotNull(message = "Order line cannot be null") OrderLineInputDto> orderLines;  // List of order line details
-
-    // Optional delivery address field, can be null if no delivery is needed
+    @NotEmpty
+    private List<@Valid @NotNull OrderLineInputDto> orderLines;
     private String deliveryAddress;
-
-    // Optional payment method field, ensure it's set based on business rules
     private String paymentMethod;
 }

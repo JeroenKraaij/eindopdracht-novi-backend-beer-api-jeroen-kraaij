@@ -2,35 +2,32 @@ package com.backend.beer_api_application.models;
 
 import com.backend.beer_api_application.enums.ImageStatus;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-
+import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter
-@Setter
-@Table (name = "image_uploads")
+@Data
+@Table(name = "image_uploads")
 public class ImageUpload {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private String fileName;
 
     @Lob
-    @Column
+    @Column(nullable = false)
     private byte[] imageData;
 
-    @Column
+    @Column(nullable = false)
     private Long size;
 
-    @Column
+    @Column(nullable = false)
     private String contentType;
 
-    @Column
+    @Column(nullable = false)
     private LocalDateTime uploadDate = LocalDateTime.now();
 
     @Column(length = 255)
@@ -42,28 +39,17 @@ public class ImageUpload {
     @Column(unique = true)
     private String hash;
 
-    @Column
+    @Column(nullable = false)
     private Boolean isFeatured = false;
 
     @Enumerated(EnumType.STRING)
-    @Column
+    @Column(nullable = false)
     private ImageStatus status = ImageStatus.ACTIVE;
 
-    @Column
+    @Column(nullable = false)
     private String fileExtension;
 
-    @ManyToOne
-    @JoinColumn
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "beer_id", nullable = false)
     private Beer beer;
-
-    public ImageUpload() {}
-
-    public ImageUpload(String fileName, byte[] imageData, Long size, String contentType, Beer beer, String fileExtension) {
-        this.fileName = fileName;
-        this.imageData = imageData;
-        this.size = size;
-        this.contentType = contentType;
-        this.beer = beer;
-        this.fileExtension = fileExtension;
-    }
 }

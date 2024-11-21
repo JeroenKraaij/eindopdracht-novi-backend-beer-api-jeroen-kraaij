@@ -8,6 +8,7 @@ import java.util.List;
 
 @Entity
 @Data
+@Table(name = "taste")
 public class Taste {
 
     @Id
@@ -24,13 +25,4 @@ public class Taste {
         this.name = name;
     }
 
-//    public void addBeer(Beer beer) {
-//        beers.add(beer);
-//        beer.getTastes().add(this);
-//    }
-//
-//    public void removeBeer(Beer beer) {
-//        beers.remove(beer);
-//        beer.getTastes().remove(this);
-//    }
 }

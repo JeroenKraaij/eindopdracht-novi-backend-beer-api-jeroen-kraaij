@@ -6,14 +6,13 @@ import lombok.Data;
 @Data
 public class CategoryInputDto {
 
-    @NotBlank(message = "Beer category name is mandatory")
-    @Size(max = 200, message = "Beer category name can be at most 200 characters")
+    @NotBlank
+    @Size(max = 255)
     private String beerCategoryName;
 
-    @Size(max = 1000, message = "Beer category description can be at most 1000 characters")
+    @Size(max = 1000)
     private String beerCategoryDescription;
 
-    @NotBlank(message = "Beer category type is mandatory")
-    @Size(max = 200, message = "Beer category type can be at most 200 characters")
+    @Size(max = 255)
     private String beerCategoryType;
 }

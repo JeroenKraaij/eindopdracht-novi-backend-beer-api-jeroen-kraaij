@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomerMapper {
 
-
     public static CustomerOutputDto transferToCustomerOutputDto(Customer customer) {
         CustomerOutputDto customerOutputDto = new CustomerOutputDto();
         customerOutputDto.setId(customer.getId());
@@ -23,7 +22,9 @@ public class CustomerMapper {
         customerOutputDto.setHouseNumber(customer.getHouseNumber());
         customerOutputDto.setPhone(customer.getPhone());
         customerOutputDto.setDateOfBirth(customer.getDateOfBirth());
+
         return customerOutputDto;
+
     }
 
     public static Customer transferToCustomerEntity(CustomerInputDto customerInputDto) {
@@ -36,6 +37,7 @@ public class CustomerMapper {
         customer.setCity(customerInputDto.getCity());
         customer.setPhone(customerInputDto.getPhone());
         customer.setDateOfBirth(customerInputDto.getDateOfBirth().toString());
+
         return customer;
     }
 }

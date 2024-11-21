@@ -22,7 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SpringSecurityConfig {
 
-    public final CustomUserDetailsService customUserDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
     private final JwtRequestFilter jwtRequestFilter;
 
     public SpringSecurityConfig(CustomUserDetailsService customUserDetailsService, JwtRequestFilter jwtRequestFilter) {
@@ -59,8 +59,11 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/beers/{id}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/beers/{id}/in-stock").hasAnyRole("ADMIN", "EDITOR")
 
-                        // ImageUploadController
+                        // ImageUploadController endpoints
                         .requestMatchers(HttpMethod.POST, "/api/v1/images/upload/{beerId}").hasAnyRole("ADMIN", "EDITOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/images/{imageId}").hasAnyRole("ADMIN", "EDITOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/images/{imageId}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/images/{imageId}/download").permitAll()
 
                         // TasteController endpoints
                         .requestMatchers(HttpMethod.GET, "/api/v1/tastes").permitAll()
@@ -83,14 +86,17 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/v1/customers/{id}").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/customers/{id}").hasAnyRole("ADMIN", "USER")
 
-                        // OrderController endpoints (new configuration)
+                        // OrderController endpoints
                         .requestMatchers(HttpMethod.GET, "/api/v1/orders").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/orders/{id}").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.POST, "/api/v1/orders").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/orders/{id}/status").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/orders/{id}").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.POST, "/api/v1/orders/{orderId}/order-lines").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/orders/{orderId}/order-lines/{orderLineId}").hasAnyRole("ADMIN", "USER")
+
+                        // OrderStatus endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/v1/orders/{id}/status").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/orders/{id}/status").hasAnyRole("ADMIN", "USER")
 
                         // OrderLineController endpoints
                         .requestMatchers(HttpMethod.GET, "/api/v1/order-lines").hasAnyRole("ADMIN", "USER")
@@ -99,23 +105,28 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/v1/order-lines/{id}").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/order-lines/{id}").hasAnyRole("ADMIN", "USER")
 
-                        // USER
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users/{id}").hasAnyRole("ADMIN", "USER", "EDITOR")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/users").hasAnyRole("ADMIN", "USER", "EDITOR")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/{id}").hasAnyRole("ADMIN", "USER", "EDITOR")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/{id}").hasAnyRole("ADMIN")
+                        // User endpoints individual
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/me").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/me").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/me/authorities").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/me/authorities").hasRole("ADMIN")
 
-                        // Common/public endpoints
+                        // All users endpoints
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/{username}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/{username}").hasRole("ADMIN")
+
+                        // Public en authentication endpoints
                         .requestMatchers("/api/v1/authenticated").authenticated()
                         .requestMatchers("/api/v1/authenticate").permitAll()
 
-                        // Deny any other requests
                         .anyRequest().denyAll()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        // Add JWT filter
+        // Voeg JWT filter toe
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

@@ -23,7 +23,6 @@ public class User {
     @Column
     private String email;
 
-    @Getter
     @OneToMany(
             targetEntity = Authority.class,
             mappedBy = "username",
@@ -33,13 +32,11 @@ public class User {
     private Set<Authority> authorities = new HashSet<>();
 
     @Column(nullable = false)
-    @Setter
     private boolean enabled = true;
 
     @Column
     private String apikey;
 
-    // One-to-One relationship with Customer
     @OneToOne(mappedBy = "user")
     private Customer customer;
     

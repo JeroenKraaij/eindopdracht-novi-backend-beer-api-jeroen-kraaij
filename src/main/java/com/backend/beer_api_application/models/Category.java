@@ -22,13 +22,11 @@ public class Category {
     private String beerCategoryType;
     private String beerCategoryDescription;
 
-    // Properly mapped relationship with Beer entity
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @EqualsAndHashCode.Exclude  // To avoid recursive calls during equality checks
-    @ToString.Exclude           // To avoid recursive toString calls, which can lead to stack overflow
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private Set<Beer> beers = new HashSet<>();
 
-    // Default constructor
     public Category() {
     }
 }

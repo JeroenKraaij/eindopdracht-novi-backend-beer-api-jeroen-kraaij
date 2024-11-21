@@ -1,9 +1,13 @@
 package com.backend.beer_api_application.controller;
 
-import com.backend.beer_api_application.exceptions.RecordNotFoundException;
+import com.backend.beer_api_application.dto.input.ImageUploadInputDto;
+import com.backend.beer_api_application.dto.output.ImageUploadOutputDto;
+import com.backend.beer_api_application.dto.mapper.ImageUploadMapper;
 import com.backend.beer_api_application.models.ImageUpload;
 import com.backend.beer_api_application.services.ImageUploadService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,22 +21,38 @@ public class ImageUploadController {
     @Autowired
     private ImageUploadService imageUploadService;
 
+    @Autowired
+    private ImageUploadMapper imageUploadMapper;
+
     @PostMapping("/images/upload/{beerId}")
-    public ResponseEntity<ImageUpload> uploadImage(@PathVariable Long beerId, @RequestParam("file") MultipartFile file) {
-        try {
-            if (!imageUploadService.existsBeerById(beerId)) {
-                throw new RecordNotFoundException("Beer with ID " + beerId + " not found");
-            }
+    public ResponseEntity<ImageUploadOutputDto> uploadImage(@PathVariable Long beerId, @ModelAttribute ImageUploadInputDto imageUploadInputDto) throws IOException {
+        ImageUploadOutputDto outputDto = imageUploadMapper.toOutputDto(
+                imageUploadService.uploadImage(beerId, imageUploadInputDto.getFile())
+        );
+        return ResponseEntity.ok(outputDto);
+    }
 
-            ImageUpload image = imageUploadService.uploadImage(beerId, file);
-            return ResponseEntity.ok(image);
+    @PutMapping("/images/{imageId}")
+    public ResponseEntity<ImageUploadOutputDto> updateImage(@PathVariable Long imageId, @ModelAttribute ImageUploadInputDto imageUploadInputDto) throws IOException {
+        ImageUploadOutputDto outputDto = imageUploadMapper.toOutputDto(
+                imageUploadService.updateImage(imageId, imageUploadInputDto.getFile())
+        );
+        return ResponseEntity.ok(outputDto);
+    }
 
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body(null);
-        } catch (RecordNotFoundException e) {
-            return ResponseEntity.status(404).body(null);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(400).body(null);
-        }
+    @DeleteMapping("/images/{imageId}")
+    public ResponseEntity<Void> deleteImage(@PathVariable Long imageId) {
+        imageUploadService.deleteImage(imageId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/images/{imageId}/download")
+    public ResponseEntity<byte[]> downloadImage(@PathVariable Long imageId) {
+        ImageUpload imageUpload = imageUploadService.getImageById(imageId);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(imageUpload.getContentType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + imageUpload.getFileName() + "\"")
+                .body(imageUpload.getImageData());
     }
 }
