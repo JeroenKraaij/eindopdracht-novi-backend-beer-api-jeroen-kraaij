@@ -43,17 +43,7 @@ public class UserController {
     public ResponseEntity<Void> updateMyUserProfile(@RequestBody Map<String, Object> request) {
         String currentUsername = getAuthenticatedUsername();
 
-        String email = (String) request.get("email");
-        String ApiKey = (String) request.get("apikey");
-        Boolean enabled = (Boolean) request.get("enabled");
-        String newRawPassword = (String) request.get("password");
-
-        UserOutputDto userDto = new UserOutputDto();
-        userDto.setApikey(ApiKey);
-        userDto.setEmail(email);
-        userDto.setEnabled(enabled);
-
-        boolean updated = userService.updateUser(currentUsername, userDto, newRawPassword);
+        boolean updated = userService.updateUserProfile(currentUsername, request);
         if (!updated) {
             throw new RecordNotFoundException("User not found: " + currentUsername);
         }
@@ -107,7 +97,6 @@ public class UserController {
     }
 
     // User management endpoints by Admin
-
     @GetMapping(value = "/users")
     public ResponseEntity<?> getAllUsers() {
         return ResponseEntity.ok().body(userService.getAllUsers());

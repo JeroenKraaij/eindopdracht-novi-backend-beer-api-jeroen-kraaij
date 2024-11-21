@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -111,6 +112,42 @@ public class UserService {
             userRepository.save(user);
             return true;
         }
+        return false;
+    }
+
+    // Update user profile with request fields
+    public boolean updateUserProfile(String username, Map<String, Object> request) {
+        Optional<User> userOpt = userRepository.findById(username);
+
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+
+            // Extract and update fields from request
+            String email = (String) request.get("email");
+            String apiKey = (String) request.get("apikey");
+            Boolean enabled = (Boolean) request.get("enabled");
+            String newRawPassword = (String) request.get("password");
+
+            if (email != null) {
+                user.setEmail(email);
+            }
+
+            if (apiKey != null) {
+                user.setApikey(apiKey);
+            }
+
+            if (enabled != null) {
+                user.setEnabled(enabled);
+            }
+
+            if (newRawPassword != null && !newRawPassword.isEmpty()) {
+                user.setPassword(passwordEncoder.encode(newRawPassword));
+            }
+
+            userRepository.save(user);
+            return true;
+        }
+
         return false;
     }
 
