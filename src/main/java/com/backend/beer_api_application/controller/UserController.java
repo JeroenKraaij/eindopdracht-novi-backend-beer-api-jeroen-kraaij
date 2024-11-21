@@ -2,18 +2,17 @@ package com.backend.beer_api_application.controller;
 
 import com.backend.beer_api_application.dto.input.UserInputDto;
 import com.backend.beer_api_application.dto.output.UserOutputDto;
+import com.backend.beer_api_application.exceptions.RecordNotFoundException;
+import com.backend.beer_api_application.models.Authority;
 import com.backend.beer_api_application.services.UserService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.Map;
+import java.util.Set;
 
 @CrossOrigin
 @RestController
@@ -26,112 +25,113 @@ public class UserController {
         this.userService = userService;
     }
 
+    private String getAuthenticatedUsername() {
+        return org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+    }
+
     @GetMapping(value = "/users/me")
-    public ResponseEntity<?> getMyUserProfile() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = authentication.getName();
-        try {
-            UserOutputDto userDto = userService.getUser(currentUsername);
-            return ResponseEntity.ok().body(userDto);
-        } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found: " + currentUsername);
-        }
+    public ResponseEntity<UserOutputDto> getMyUserProfile() {
+        String currentUsername = getAuthenticatedUsername();
+        return userService.getUser(currentUsername)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new RecordNotFoundException("User not found: " + currentUsername));
     }
 
     @PutMapping(value = "/users/me")
-    public ResponseEntity<?> updateMyUserProfile(@RequestBody Map<String, Object> request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = authentication.getName();
+    public ResponseEntity<Void> updateMyUserProfile(@RequestBody Map<String, Object> request) {
+        String currentUsername = getAuthenticatedUsername();
 
-        try {
-            String email = (String) request.get("email");
-            Boolean enabled = (Boolean) request.get("enabled");
-            String newRawPassword = (String) request.get("password");
-
-            UserOutputDto userDto = new UserOutputDto();
-            userDto.setEmail(email);
-            userDto.setEnabled(enabled);
-
-            userService.updateUser(currentUsername, userDto, newRawPassword);
-            return ResponseEntity.noContent().build();
-        } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found: " + currentUsername);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input data: " + e.getMessage());
+        boolean updated = userService.updateUserProfile(currentUsername, request);
+        if (!updated) {
+            throw new RecordNotFoundException("User not found: " + currentUsername);
         }
+
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping(value = "/users/me")
-    public ResponseEntity<?> deleteMyUserProfile() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = authentication.getName();
+    public ResponseEntity<Void> deleteMyUserProfile() {
+        String currentUsername = getAuthenticatedUsername();
 
-        if (!userService.userExists(currentUsername)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found: " + currentUsername);
+        boolean deleted = userService.deleteUser(currentUsername);
+        if (!deleted) {
+            throw new RecordNotFoundException("User not found: " + currentUsername);
         }
-        userService.deleteUser(currentUsername);
+
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping(value = "/users/me/authorities")
-    public ResponseEntity<?> getMyUserAuthorities() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = authentication.getName();
-        try {
-            return ResponseEntity.ok().body(userService.getAuthorities(currentUsername));
-        } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found: " + currentUsername);
-        }
+    public ResponseEntity<Set<Authority>> getMyUserAuthorities() {
+        String currentUsername = getAuthenticatedUsername();
+        return userService.getAuthorities(currentUsername)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new RecordNotFoundException("User not found: " + currentUsername));
     }
 
     @PostMapping(value = "/users/me/authorities")
-    public ResponseEntity<?> addMyUserAuthority(@RequestBody Map<String, Object> fields) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = authentication.getName();
+    public ResponseEntity<Void> addMyUserAuthority(@RequestBody Map<String, Object> fields) {
+        String currentUsername = getAuthenticatedUsername();
+        String authorityName = (String) fields.get("authority");
 
-        try {
-            String authorityName = (String) fields.get("authority");
-            userService.addAuthority(currentUsername, authorityName);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        boolean added = userService.addAuthority(currentUsername, authorityName);
+        if (!added) {
+            throw new RecordNotFoundException("User not found: " + currentUsername);
         }
+
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping(value = "/users/me/authorities/{authority}")
-    public ResponseEntity<?> deleteMyUserAuthority(@PathVariable("authority") String authority) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = authentication.getName();
+    public ResponseEntity<Void> deleteMyUserAuthority(@PathVariable("authority") String authority) {
+        String currentUsername = getAuthenticatedUsername();
 
-        try {
-            userService.removeAuthority(currentUsername, authority);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        boolean removed = userService.removeAuthority(currentUsername, authority);
+        if (!removed) {
+            throw new RecordNotFoundException("User or authority not found for user: " + currentUsername);
         }
+
+        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping(value = "/users/")
+    // User management endpoints by Admin
+    @GetMapping(value = "/users")
     public ResponseEntity<?> getAllUsers() {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String currentUsername = authentication.getName();
-            return ResponseEntity.ok().body(userService.getAllUsers(currentUsername));
-        } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        }
+        return ResponseEntity.ok().body(userService.getAllUsers());
     }
 
     @PostMapping(value = "/users")
-    public ResponseEntity<?> createUser(@Valid @RequestBody UserInputDto userInputDto) {
-        try {
-            String newUsername = userService.createUser(userInputDto);
-            userService.addAuthority(newUsername, "ROLE_USER");
-            URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{username}")
-                    .buildAndExpand(newUsername).toUri();
-            return ResponseEntity.created(location).build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input data: " + e.getMessage());
+    public ResponseEntity<Void> createUser(@Valid @RequestBody UserInputDto userInputDto) {
+        String newUsername = userService.createUser(userInputDto);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{username}")
+                .buildAndExpand(newUsername).toUri();
+        return ResponseEntity.created(location).build();
+    }
+
+    @GetMapping(value = "/users/{username}")
+    public ResponseEntity<UserOutputDto> getUserByUsername(@PathVariable String username) {
+        return userService.getUser(username)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new RecordNotFoundException("User not found: " + username));
+    }
+
+    @PutMapping(value = "/users/{username}")
+    public ResponseEntity<Void> addOrUpdateUsername(@PathVariable String username, @Valid @RequestBody UserInputDto userInputDto) {
+        boolean updated = userService.updateUsername(username, userInputDto);
+        if (!updated) {
+            throw new RecordNotFoundException("User not found: " + username);
         }
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping(value = "/users/{username}")
+    public ResponseEntity<Void> deleteUserByUsername(@PathVariable String username) {
+        boolean deleted = userService.deleteUserByUsername(username);
+        if (!deleted) {
+            throw new RecordNotFoundException("User not found: " + username);
+        }
+        return ResponseEntity.noContent().build();
     }
 }

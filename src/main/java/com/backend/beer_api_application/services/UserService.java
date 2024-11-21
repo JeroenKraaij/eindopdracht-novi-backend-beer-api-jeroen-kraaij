@@ -3,18 +3,17 @@ package com.backend.beer_api_application.services;
 import com.backend.beer_api_application.dto.input.UserInputDto;
 import com.backend.beer_api_application.dto.mapper.UserMapper;
 import com.backend.beer_api_application.dto.output.UserOutputDto;
-import com.backend.beer_api_application.exceptions.RecordNotFoundException;
 import com.backend.beer_api_application.models.Authority;
 import com.backend.beer_api_application.models.User;
 import com.backend.beer_api_application.repositories.UserRepository;
 import com.backend.beer_api_application.utils.RandomStringGenerator;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,32 +28,31 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public UserOutputDto getUser(String username) {
-        String currentUsername = getAuthenticatedUsername();
-        if (!currentUsername.equals(username)) {
-            throw new SecurityException("You can only access your own profile.");
-        }
-
-        User user = findUserByUsername(username);
-        return UserMapper.transferToUserOutputDto(user);
+    // Find a user by username
+    public User findUserByUsername(String username) {
+        return userRepository.findById(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
 
-    public List<UserOutputDto> getAllUsers(String username) {
-        String currentUsername = getAuthenticatedUsername();
-        if (!currentUsername.equals(username)) {
-            throw new SecurityException("You can only access your own profile.");
-        }
+    // Retrieve user details by username
+    public Optional<UserOutputDto> getUser(String username) {
+        return userRepository.findById(username)
+                .map(UserMapper::transferToUserOutputDto);
+    }
 
-        List<User> users = userRepository.findAll();
-        return users.stream()
+    // Retrieve all users visible to Admin
+    public List<UserOutputDto> getAllUsers() {
+        return userRepository.findAll().stream()
                 .map(UserMapper::transferToUserOutputDto)
                 .collect(Collectors.toList());
     }
 
+    // Check if a user exists
     public boolean userExists(String username) {
         return userRepository.existsById(username);
     }
 
+    // Create a new user
     public String createUser(UserInputDto userInputDto) {
         String randomString = RandomStringGenerator.generateAlphaNumeric(20);
         User newUser = UserMapper.transferToUserEntity(userInputDto);
@@ -64,81 +62,131 @@ public class UserService {
         return newUser.getUsername();
     }
 
-    public void deleteUser(String username) {
-        String currentUsername = getAuthenticatedUsername();
-        if (!currentUsername.equals(username)) {
-            throw new SecurityException("You can only delete your own profile.");
+    // Delete a user by username
+    public boolean deleteUser(String username) {
+        if (userRepository.existsById(username)) {
+            userRepository.deleteById(username);
+            return true;
         }
-
-        if (!userRepository.existsById(username)) {
-            throw new RecordNotFoundException("User not found: " + username);
-        }
-        userRepository.deleteById(username);
+        return false;
     }
 
-    public void updateUser(String username, UserOutputDto updatedUserDto, String newRawPassword) {
-        String currentUsername = getAuthenticatedUsername();
-        if (!currentUsername.equals(username)) {
-            throw new SecurityException("You can only update your own profile.");
-        }
-
-        User existingUser = findUserByUsername(username);
-
-        existingUser.setEnabled(updatedUserDto.getEnabled());
-        existingUser.setApikey(updatedUserDto.getApikey());
-        existingUser.setEmail(updatedUserDto.getEmail());
-
-        if (newRawPassword != null && !newRawPassword.isEmpty()) {
-            existingUser.setPassword(passwordEncoder.encode(newRawPassword));
-        }
-
-        userRepository.save(existingUser);
+    // Delete a user by username (specific for DeleteMapping)
+    public boolean deleteUserByUsername(String username) {
+        return deleteUser(username);
     }
 
-    public Set<Authority> getAuthorities(String username) {
-        String currentUsername = getAuthenticatedUsername();
-        if (!currentUsername.equals(username)) {
-            throw new SecurityException("You can only access your own authorities.");
-        }
+    // Update user details
+    public boolean updateUser(String username, UserOutputDto updatedUserDto, String newRawPassword) {
+        Optional<User> userOpt = userRepository.findById(username);
 
-        User user = findUserByUsername(username);
-        return user.getAuthorities();
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setEnabled(updatedUserDto.getEnabled());
+            user.setApikey(updatedUserDto.getApikey());
+            user.setEmail(updatedUserDto.getEmail());
+
+            if (newRawPassword != null && !newRawPassword.isEmpty()) {
+                user.setPassword(passwordEncoder.encode(newRawPassword));
+            }
+
+            userRepository.save(user);
+            return true;
+        }
+        return false;
     }
 
-    public void addAuthority(String username, String authority) {
-        String currentUsername = getAuthenticatedUsername();
-        if (!currentUsername.equals(username)) {
-            throw new SecurityException("You can only modify your own authorities.");
-        }
+    // Update or add a username
+    public boolean updateUsername(String username, UserInputDto userInputDto) {
+        Optional<User> userOpt = userRepository.findById(username);
 
-        User user = findUserByUsername(username);
-        user.addAuthority(new Authority(username, authority));
-        userRepository.save(user);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setEmail(userInputDto.getEmail());
+            user.setEnabled(userInputDto.getEnabled());
+
+            if (userInputDto.getPassword() != null && !userInputDto.getPassword().isEmpty()) {
+                user.setPassword(passwordEncoder.encode(userInputDto.getPassword()));
+            }
+
+            userRepository.save(user);
+            return true;
+        }
+        return false;
     }
 
-    public void removeAuthority(String username, String authority) {
-        String currentUsername = getAuthenticatedUsername();
-        if (!currentUsername.equals(username)) {
-            throw new SecurityException("You can only modify your own authorities.");
+    // Update user profile with request fields
+    public boolean updateUserProfile(String username, Map<String, Object> request) {
+        Optional<User> userOpt = userRepository.findById(username);
+
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+
+            // Extract and update fields from request
+            String email = (String) request.get("email");
+            String apiKey = (String) request.get("apikey");
+            Boolean enabled = (Boolean) request.get("enabled");
+            String newRawPassword = (String) request.get("password");
+
+            if (email != null) {
+                user.setEmail(email);
+            }
+
+            if (apiKey != null) {
+                user.setApikey(apiKey);
+            }
+
+            if (enabled != null) {
+                user.setEnabled(enabled);
+            }
+
+            if (newRawPassword != null && !newRawPassword.isEmpty()) {
+                user.setPassword(passwordEncoder.encode(newRawPassword));
+            }
+
+            userRepository.save(user);
+            return true;
         }
 
-        User user = findUserByUsername(username);
-        Authority authorityToRemove = user.getAuthorities().stream()
-                .filter(a -> a.getAuthority().equalsIgnoreCase(authority))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Authority not found: " + authority));
-
-        user.removeAuthority(authorityToRemove);
-        userRepository.save(user);
+        return false;
     }
 
-    User findUserByUsername(String username) {
+    // Retrieve authorities of a user
+    public Optional<Set<Authority>> getAuthorities(String username) {
         return userRepository.findById(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+                .map(User::getAuthorities);
     }
 
-    private String getAuthenticatedUsername() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication.getName();
+    // Add an authority to a user
+    public boolean addAuthority(String username, String authority) {
+        Optional<User> userOpt = userRepository.findById(username);
+
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.addAuthority(new Authority(username, authority));
+            userRepository.save(user);
+            return true;
+        }
+        return false;
+    }
+
+    // Remove an authority from a user
+    public boolean removeAuthority(String username, String authority) {
+        Optional<User> userOpt = userRepository.findById(username);
+
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            Authority authorityToRemove = user.getAuthorities().stream()
+                    .filter(a -> a.getAuthority().equalsIgnoreCase(authority))
+                    .findFirst()
+                    .orElse(null);
+
+            if (authorityToRemove != null) {
+                user.removeAuthority(authorityToRemove);
+                userRepository.save(user);
+                return true;
+            }
+        }
+        return false;
     }
 }
